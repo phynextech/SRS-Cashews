@@ -27,6 +27,7 @@ const recentOrdersList = document.getElementById('recent-orders-list');
 // SMS page elements
 const orderNotifications = document.getElementById('order-notifications');
 const sendAllSmsBtn = document.getElementById('send-all-sms');
+const sendAllSmsPortalBtn = document.getElementById('send-all-sms-portal');
 const refreshOrdersSmsBtn = document.getElementById('refresh-orders-sms');
 const pendingOrdersElement = document.getElementById('pending-orders');
 const totalCustomersSmsElement = document.getElementById('total-customers-sms');
@@ -95,24 +96,166 @@ async function loadProducts() {
     }
 }
 
+// Add dummy orders for demonstration
+function addDummyOrders() {
+    const dummyOrders = [
+        {
+            _id: "dummy_order_1",
+            customerName: "Rajesh Kumar",
+            customerPhone: "+91 9876543210",
+            customerAddress: "123 MG Road, Anna Nagar",
+            customerPincode: "600040",
+            customerPlace: "Chennai",
+            paymentMethod: "cod",
+            date: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(), // 2 hours ago
+            items: [
+                {
+                    name: "Batham Cashew Nuts",
+                    nameTamil: "பாதாம் முந்திரி",
+                    price: 140,
+                    quantity: 2,
+                    total: 280,
+                    productId: "batham"
+                },
+                {
+                    name: "Premium California Almonds",
+                    nameTamil: "பாதாம்",
+                    price: 120,
+                    quantity: 1,
+                    total: 120,
+                    productId: "badam"
+                }
+            ],
+            total: 450, // 400 + 50 shipping
+            status: "pending",
+            source: "SRS Cashews Website"
+        },
+        {
+            _id: "dummy_order_2",
+            customerName: "Priya Sharma",
+            customerPhone: "+91 8765432109",
+            customerAddress: "45 Gandhi Street, T Nagar",
+            customerPincode: "600017",
+            customerPlace: "Chennai",
+            paymentMethod: "online",
+            date: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString(), // 1 day ago
+            items: [
+                {
+                    name: "W-180 Premium Cashews",
+                    nameTamil: "W-180 முந்திரி",
+                    price: 160,
+                    quantity: 3,
+                    total: 480,
+                    productId: "w180"
+                },
+                {
+                    name: "Iranian Pistachios",
+                    nameTamil: "பிஸ்தா",
+                    price: 160,
+                    quantity: 1,
+                    total: 160,
+                    productId: "pista"
+                },
+                {
+                    name: "Medjool Dates",
+                    nameTamil: "பேரீச்சம் பழம்",
+                    price: 80,
+                    quantity: 2,
+                    total: 160,
+                    productId: "dates"
+                }
+            ],
+            total: 850, // 800 + 50 shipping
+            status: "completed",
+            source: "SRS Cashews Website"
+        },
+        {
+            _id: "dummy_order_3",
+            customerName: "Arun Patel",
+            customerPhone: "+91 7654321098",
+            customerAddress: "78 Nehru Street, Adyar",
+            customerPincode: "600020",
+            customerPlace: "Chennai",
+            paymentMethod: "cod",
+            date: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(), // 3 days ago
+            items: [
+                {
+                    name: "Jumbo Whole Cashews",
+                    nameTamil: "காஜு முந்திரி",
+                    price: 130,
+                    quantity: 4,
+                    total: 520,
+                    productId: "kaju"
+                }
+            ],
+            total: 570, // 520 + 50 shipping
+            status: "pending",
+            source: "SRS Cashews Website"
+        },
+        {
+            _id: "dummy_order_4",
+            customerName: "Deepa Iyer",
+            customerPhone: "+91 6543210987",
+            customerAddress: "22 Velachery Main Road",
+            customerPincode: "600042",
+            customerPlace: "Chennai",
+            paymentMethod: "online",
+            date: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(), // 5 days ago
+            items: [
+                {
+                    name: "W-210 Cashews",
+                    nameTamil: "W-210 முந்திரி",
+                    price: 150,
+                    quantity: 2,
+                    total: 300,
+                    productId: "w210"
+                },
+                {
+                    name: "Roasted Fox Nuts",
+                    nameTamil: "மகானா",
+                    price: 90,
+                    quantity: 3,
+                    total: 270,
+                    productId: "makhana"
+                }
+            ],
+            total: 620, // 570 + 50 shipping
+            status: "cancelled",
+            source: "SRS Cashews Website"
+        }
+    ];
+
+    // Add dummy orders to the orders array
+    orders = [...dummyOrders, ...orders];
+    filteredOrders = [...orders];
+}
+
 // Load orders from MongoDB
 async function loadOrders() {
     try {
-        orders = await apiCall('/orders');
-        filteredOrders = [...orders];
-        renderOrderHistory();
-        renderOrderNotifications();
-        renderRecentOrders();
-        updateStats();
+        // Try to load from API first
+        const apiOrders = await apiCall('/orders');
+        orders = apiOrders;
     } catch (error) {
-        console.error('Failed to load orders from API:', error);
-        showNotification('Failed to load orders.', true);
+        console.error('Failed to load orders from API, using dummy data:', error);
+        // Use dummy data if API fails
+        orders = [];
     }
+    
+    // Always add dummy orders for demonstration
+    addDummyOrders();
+    
+    filteredOrders = [...orders];
+    renderOrderHistory();
+    renderOrderNotifications();
+    renderRecentOrders();
+    updateStats();
 }
 
-// Fallback to local products
+// Fallback to local products with all products from customer page
 function loadLocalProducts() {
     products = {
+        // Premium Panruti Cashews
         batham: { 
             id: "batham",
             name: "Batham Cashew Nuts", 
@@ -132,6 +275,219 @@ function loadLocalProducts() {
             image: "https://images.unsplash.com/photo-1626074353765-517f5517d9d4?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80",
             category: "cashews",
             badge: "Premium"
+        },
+        w180: { 
+            id: "w180",
+            name: "W-180 Premium Cashews", 
+            nameTamil: "W-180 முந்திரி",
+            price: 160,
+            description: "Large W-180 grade cashews, the finest quality from Panruti.",
+            image: "https://images.unsplash.com/photo-1626074353765-517f5517d9d4?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80",
+            category: "cashews",
+            badge: "Premium"
+        },
+        w210: { 
+            id: "w210",
+            name: "W-210 Cashews", 
+            nameTamil: "W-210 முந்திரி",
+            price: 150,
+            description: "Premium W-210 grade cashews from Panruti farms.",
+            image: "https://images.unsplash.com/photo-1626074353765-517f5517d9d4?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80",
+            category: "cashews",
+            badge: "Popular"
+        },
+        w240: { 
+            id: "w240",
+            name: "W-240 Cashews", 
+            nameTamil: "W-240 முந்திரி",
+            price: 140,
+            description: "Quality W-240 grade cashews, perfect for daily consumption.",
+            image: "https://images.unsplash.com/photo-1626074353765-517f5517d9d4?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80",
+            category: "cashews"
+        },
+        w320: { 
+            id: "w320",
+            name: "W-320 Cashews", 
+            nameTamil: "W-320 முந்திரி",
+            price: 130,
+            description: "Economical W-320 grade cashews from Panruti.",
+            image: "https://images.unsplash.com/photo-1626074353765-517f5517d9d4?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80",
+            category: "cashews"
+        },
+        
+        // Other Nuts
+        badam: { 
+            id: "badam",
+            name: "Premium California Almonds", 
+            nameTamil: "பாதாம்",
+            price: 120,
+            description: "Large, crunchy California almonds with rich flavor and perfect texture.",
+            image: "https://images.unsplash.com/photo-1615485500606-f3d3f2f7fb7f?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80",
+            category: "nuts",
+            badge: "Premium"
+        },
+        akhrot: { 
+            id: "akhrot",
+            name: "Premium Walnut Halves", 
+            nameTamil: "அக்ரோட்",
+            price: 110,
+            description: "Fresh walnut halves with rich, earthy flavor and crisp texture.",
+            image: "https://images.unsplash.com/photo-1574323347407-f5e1ad6d020b?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80",
+            category: "nuts"
+        },
+        pista: { 
+            id: "pista",
+            name: "Iranian Pistachios", 
+            nameTamil: "பிஸ்தா",
+            price: 160,
+            description: "Premium Iranian pistachios, naturally opened and lightly salted.",
+            image: "https://images.unsplash.com/photo-1615485500606-f3d3f2f7fb7f?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80",
+            category: "nuts",
+            badge: "Premium"
+        },
+        makhana: { 
+            id: "makhana",
+            name: "Roasted Fox Nuts", 
+            nameTamil: "மகானா",
+            price: 90,
+            description: "Lightly roasted fox nuts, perfect for healthy snacking.",
+            image: "https://images.unsplash.com/photo-1574323347407-f5e1ad6d020b?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80",
+            category: "nuts"
+        },
+        kishmish: { 
+            id: "kishmish",
+            name: "Black Raisins", 
+            nameTamil: "கிஸ்மிஸ்",
+            price: 60,
+            description: "Sweet black raisins, perfect for cooking and snacking.",
+            image: "https://images.unsplash.com/photo-1597872200969-2b65d56bd112?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80",
+            category: "dryfruits"
+        },
+        
+        // Dry Fruits
+        dates: { 
+            id: "dates",
+            name: "Medjool Dates", 
+            nameTamil: "பேரீச்சம் பழம்",
+            price: 80,
+            description: "Premium Medjool dates, naturally sweet and rich in fiber.",
+            image: "https://images.unsplash.com/photo-1597872200969-2b65d56bd112?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80",
+            category: "dryfruits",
+            badge: "Healthy"
+        },
+        blackdates: { 
+            id: "blackdates",
+            name: "Black Dates", 
+            nameTamil: "கரு பேரீச்சம் பழம்",
+            price: 95,
+            description: "Rich black dates with deep flavor and nutritional benefits.",
+            image: "https://images.unsplash.com/photo-1597872200969-2b65d56bd112?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80",
+            category: "dryfruits"
+        },
+        anjeer: { 
+            id: "anjeer",
+            name: "Dried Figs", 
+            nameTamil: "அத்தி பழம்",
+            price: 110,
+            description: "Natural dried figs, rich in fiber and essential nutrients.",
+            image: "https://images.unsplash.com/photo-1597872200969-2b65d56bd112?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80",
+            category: "dryfruits"
+        },
+        apricot: { 
+            id: "apricot",
+            name: "Dried Apricots", 
+            nameTamil: "சர்க்கரை பாதாமி",
+            price: 85,
+            description: "Sun-dried apricots with natural sweetness and chewy texture.",
+            image: "https://images.unsplash.com/photo-1597872200969-2b65d56bd112?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80",
+            category: "dryfruits"
+        },
+        prune: { 
+            id: "prune",
+            name: "Dried Prunes", 
+            nameTamil: "உலர்ந்த ப்ளம்",
+            price: 75,
+            description: "Natural dried prunes, great for digestive health.",
+            image: "https://images.unsplash.com/photo-1597872200969-2b65d56bd112?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80",
+            category: "dryfruits"
+        },
+        
+        // Seeds
+        pumpkineseeds: { 
+            id: "pumpkineseeds",
+            name: "Pumpkin Seeds", 
+            nameTamil: "பூசணி விதைகள்",
+            price: 70,
+            description: "Roasted pumpkin seeds, rich in zinc and magnesium.",
+            image: "https://images.unsplash.com/photo-1623650077315-9df4c0a7d3b6?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80",
+            category: "seeds",
+            badge: "Popular"
+        },
+        sunflowerseeds: { 
+            id: "sunflowerseeds",
+            name: "Sunflower Seeds", 
+            nameTamil: "சூரியகாந்தி விதைகள்",
+            price: 55,
+            description: "Raw sunflower seeds, packed with vitamin E and healthy fats.",
+            image: "https://images.unsplash.com/photo-1623650077315-9df4c0a7d3b6?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80",
+            category: "seeds"
+        },
+        flaxseeds: { 
+            id: "flaxseeds",
+            name: "Flax Seeds", 
+            nameTamil: "அளசி விதைகள்",
+            price: 65,
+            description: "Organic flax seeds, excellent source of omega-3 fatty acids.",
+            image: "https://images.unsplash.com/photo-1623650077315-9df4c0a7d3b6?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80",
+            category: "seeds"
+        },
+        chia: { 
+            id: "chia",
+            name: "Chia Seeds", 
+            nameTamil: "சியா விதைகள்",
+            price: 90,
+            description: "Premium chia seeds, high in fiber and antioxidants.",
+            image: "https://images.unsplash.com/photo-1623650077315-9df4c0a7d3b6?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80",
+            category: "seeds"
+        },
+        sesame: { 
+            id: "sesame",
+            name: "Sesame Seeds", 
+            nameTamil: "எள்ளு",
+            price: 50,
+            description: "Natural sesame seeds, rich in calcium and antioxidants.",
+            image: "https://images.unsplash.com/photo-1623650077315-9df4c0a7d3b6?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80",
+            category: "seeds"
+        },
+        
+        // Premium Category
+        macadamia: { 
+            id: "macadamia",
+            name: "Hawaiian Macadamia Nuts", 
+            nameTamil: "மக்கடாமியா",
+            price: 200,
+            description: "Rich, buttery Hawaiian macadamia nuts, lightly roasted.",
+            image: "https://images.unsplash.com/photo-1574323347407-f5e1ad6d020b?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80",
+            category: "premium",
+            badge: "Premium"
+        },
+        brazil: { 
+            id: "brazil",
+            name: "Brazil Nuts", 
+            nameTamil: "பிரேசில் கொட்டை",
+            price: 180,
+            description: "Large Brazil nuts, excellent source of selenium.",
+            image: "https://images.unsplash.com/photo-1574323347407-f5e1ad6d020b?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80",
+            category: "premium"
+        },
+        pecans: { 
+            id: "pecans",
+            name: "Pecan Nuts", 
+            nameTamil: "பிகான் கொட்டை",
+            price: 170,
+            description: "Sweet and buttery pecan nuts, perfect for baking.",
+            image: "https://images.unsplash.com/photo-1574323347407-f5e1ad6d020b?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80",
+            category: "premium"
         }
     };
     renderOwnerForms();
@@ -191,7 +547,27 @@ async function updateOrderStatus(orderId, status) {
     }
 }
 
-// OWNER PORTAL FUNCTIONS
+// Tab navigation functionality
+function setupTabNavigation() {
+    const tabs = document.querySelectorAll('.owner-tab');
+    const tabContents = document.querySelectorAll('.tab-content');
+    
+    tabs.forEach(tab => {
+        tab.addEventListener('click', () => {
+            const tabId = tab.getAttribute('data-tab');
+            
+            // Remove active class from all tabs and contents
+            tabs.forEach(t => t.classList.remove('active'));
+            tabContents.forEach(content => content.classList.remove('active'));
+            
+            // Add active class to clicked tab and corresponding content
+            tab.classList.add('active');
+            document.getElementById(`${tabId}-tab`).classList.add('active');
+        });
+    });
+}
+
+// OWNER PORTAL FUNCTIONS - UPDATED COMPACT LAYOUT
 function renderOwnerForms() {
     productForms.innerHTML = '';
     
@@ -200,7 +576,6 @@ function renderOwnerForms() {
         return;
     }
     
-    // Filter products based on search
     const searchTerm = productSearch.value.toLowerCase();
     const filteredProducts = Object.entries(products).filter(([id, product]) => 
         product.name.toLowerCase().includes(searchTerm) ||
@@ -217,68 +592,79 @@ function renderOwnerForms() {
         const form = document.createElement('div');
         form.className = 'product-edit-form';
         form.innerHTML = `
-            <div class="product-form-header">
-                <div class="product-form-title">${product.name}</div>
-                <div class="product-badge">${product.category}</div>
-            </div>
-            <div class="product-form-content">
-                <div class="form-group">
-                    <label for="${productId}-name">Product Name</label>
-                    <input type="text" class="form-control" id="${productId}-name" value="${product.name}">
-                </div>
-                <div class="form-group">
-                    <label for="${productId}-tamil">Tamil Name</label>
-                    <input type="text" class="form-control" id="${productId}-tamil" value="${product.nameTamil || ''}" placeholder="Tamil name">
-                </div>
-                <div class="form-group">
-                    <label for="${productId}-price">Price (₹ per 50g)</label>
-                    <input type="number" class="form-control" id="${productId}-price" value="${product.price}">
-                </div>
-                <div class="form-group">
-                    <label for="${productId}-category">Category</label>
-                    <select class="form-control" id="${productId}-category">
-                        <option value="cashews" ${product.category === 'cashews' ? 'selected' : ''}>Panruti Cashews</option>
-                        <option value="nuts" ${product.category === 'nuts' ? 'selected' : ''}>Other Nuts</option>
-                        <option value="dryfruits" ${product.category === 'dryfruits' ? 'selected' : ''}>Dry Fruits</option>
-                        <option value="seeds" ${product.category === 'seeds' ? 'selected' : ''}>Seeds</option>
-                        <option value="premium" ${product.category === 'premium' ? 'selected' : ''}>Premium</option>
-                    </select>
-                </div>
-                <div class="form-group full-width">
-                    <label for="${productId}-description">Description</label>
-                    <textarea class="form-control" id="${productId}-description">${product.description}</textarea>
-                </div>
-                <div class="form-group">
-                    <label for="${productId}-badge">Badge</label>
-                    <select class="form-control" id="${productId}-badge">
-                        <option value="">No Badge</option>
-                        <option value="Panruti Special" ${product.badge === 'Panruti Special' ? 'selected' : ''}>Panruti Special</option>
-                        <option value="Premium" ${product.badge === 'Premium' ? 'selected' : ''}>Premium</option>
-                        <option value="Popular" ${product.badge === 'Popular' ? 'selected' : ''}>Popular</option>
-                        <option value="Healthy" ${product.badge === 'Healthy' ? 'selected' : ''}>Healthy</option>
-                    </select>
-                </div>
-            </div>
             <div class="product-image-section">
                 <div class="current-image">
-                    <h5>Current Image</h5>
-                    <img src="${product.image}" alt="${product.name}" onerror="this.src='https://via.placeholder.com/200x150?text=SRS+Cashews'">
+                    <img src="${product.image}" alt="${product.name}" onerror="this.src='https://via.placeholder.com/80x60?text=SRS+Cashews'">
                 </div>
                 <div class="image-url-input">
-                    <label for="${productId}-image">Product Image URL</label>
-                    <input type="text" class="form-control" id="${productId}-image" value="${product.image}" 
-                           placeholder="Enter image URL" oninput="updateImagePreview('${productId}')">
+                    <label for="${productId}-image">Image URL</label>
+                    <input type="text" class="form-control compact-form-control" id="${productId}-image" value="${product.image}" 
+                           placeholder="Image URL" oninput="updateImagePreview('${productId}')">
                     <div class="image-preview-container">
                         <div class="image-preview" id="${productId}-preview">
-                            <span>New image preview will appear here</span>
+                            <span>Preview</span>
                         </div>
                     </div>
                 </div>
             </div>
-            <div class="product-actions">
-                <button class="btn btn-danger" onclick="deleteProductHandler('${productId}')">
-                    <i class="fas fa-trash"></i> Delete Product
-                </button>
+            
+            <div class="product-details-section">
+                <div class="product-header-info">
+                    <div class="product-title">${product.name}</div>
+                    <div class="product-meta">
+                        <span class="product-category-badge">${product.category}</span>
+                        <span class="product-price-badge">₹${product.price}</span>
+                    </div>
+                </div>
+                
+                <!-- First Row: Name, Tamil Name, Price -->
+                <div class="product-main-row">
+                    <div class="compact-form-group product-name-input">
+                        <label for="${productId}-name">Name</label>
+                        <input type="text" class="compact-form-control" id="${productId}-name" value="${product.name}">
+                    </div>
+                    <div class="compact-form-group product-tamil-input">
+                        <label for="${productId}-tamil">Tamil</label>
+                        <input type="text" class="compact-form-control" id="${productId}-tamil" value="${product.nameTamil || ''}" placeholder="Tamil name">
+                    </div>
+                    <div class="compact-form-group product-price-input">
+                        <label for="${productId}-price">Price</label>
+                        <input type="number" class="compact-form-control" id="${productId}-price" value="${product.price}">
+                    </div>
+                </div>
+                
+                <!-- Second Row: Description -->
+                <div class="compact-form-group product-description-row">
+                    <label for="${productId}-description">Description</label>
+                    <textarea class="compact-form-control compact-textarea" id="${productId}-description">${product.description}</textarea>
+                </div>
+                
+                <!-- Third Row: Category, Badge, Delete Button -->
+                <div class="product-actions-row">
+                    <div class="compact-form-group product-category-select">
+                        <label for="${productId}-category">Category</label>
+                        <select class="compact-form-control" id="${productId}-category">
+                            <option value="cashews" ${product.category === 'cashews' ? 'selected' : ''}>Cashews</option>
+                            <option value="nuts" ${product.category === 'nuts' ? 'selected' : ''}>Nuts</option>
+                            <option value="dryfruits" ${product.category === 'dryfruits' ? 'selected' : ''}>Dry Fruits</option>
+                            <option value="seeds" ${product.category === 'seeds' ? 'selected' : ''}>Seeds</option>
+                            <option value="premium" ${product.category === 'premium' ? 'selected' : ''}>Premium</option>
+                        </select>
+                    </div>
+                    <div class="compact-form-group product-badge-select">
+                        <label for="${productId}-badge">Badge</label>
+                        <select class="compact-form-control" id="${productId}-badge">
+                            <option value="">No Badge</option>
+                            <option value="Panruti Special" ${product.badge === 'Panruti Special' ? 'selected' : ''}>Panruti Special</option>
+                            <option value="Premium" ${product.badge === 'Premium' ? 'selected' : ''}>Premium</option>
+                            <option value="Popular" ${product.badge === 'Popular' ? 'selected' : ''}>Popular</option>
+                            <option value="Healthy" ${product.badge === 'Healthy' ? 'selected' : ''}>Healthy</option>
+                        </select>
+                    </div>
+                    <button class="btn btn-danger compact-btn" onclick="deleteProductHandler('${productId}')">
+                        <i class="fas fa-trash"></i> Delete
+                    </button>
+                </div>
             </div>
         `;
         
@@ -755,6 +1141,7 @@ function setupEventListeners() {
     
     // SMS page
     sendAllSmsBtn.addEventListener('click', sendSMSToAll);
+    sendAllSmsPortalBtn.addEventListener('click', sendSMSToAll);
     refreshOrdersSmsBtn.addEventListener('click', refreshOrders);
     refreshOrdersBtn.addEventListener('click', refreshOrders);
     
@@ -777,6 +1164,9 @@ function setupEventListeners() {
         });
     });
     
+    // Tab navigation
+    setupTabNavigation();
+    
     // Allow login with Enter key
     ownerPassword.addEventListener('keypress', (e) => {
         if (e.key === 'Enter') {
@@ -795,3 +1185,10 @@ window.deleteProductHandler = deleteProductHandler;
 window.updateOrderStatusHandler = updateOrderStatusHandler;
 window.sendSMSNotification = sendSMSNotification;
 window.sendPaymentReminder = sendPaymentReminder;
+
+
+
+
+
+
+
