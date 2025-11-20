@@ -4,7 +4,6 @@ const API_BASE_URL = 'http://localhost:5000/api';
 // Global data
 let products = {};
 let cart = {};
-let orders = [];
 let currentSlide = 0;
 let slideInterval;
 
@@ -23,6 +22,7 @@ const notification = document.getElementById('notification');
 const cartCount = document.querySelector('.cart-count');
 const productSearch = document.getElementById('product-search');
 const filterButtons = document.querySelectorAll('.filter-btn');
+const categoryCards = document.querySelectorAll('.category-card');
 
 // Carousel elements
 const carouselInner = document.querySelector('.carousel-inner');
@@ -31,43 +31,29 @@ const prevButton = document.querySelector('.carousel-control.prev');
 const nextButton = document.querySelector('.carousel-control.next');
 const indicators = document.querySelectorAll('.carousel-indicator');
 
-// Owner portal elements
-const passwordSection = document.getElementById('password-section');
-const ownerContent = document.getElementById('owner-content');
-const ownerPassword = document.getElementById('owner-password');
-const loginBtn = document.getElementById('login-btn');
-const logoutBtn = document.getElementById('logout-btn');
-const saveChangesBtn = document.getElementById('save-changes');
-const productForms = document.getElementById('product-forms');
-const orderList = document.getElementById('order-list');
-const noOrdersMessage = document.getElementById('no-orders-message');
-
-// SMS page elements
-const orderNotifications = document.getElementById('order-notifications');
-const noNotificationsMessage = document.getElementById('no-notifications-message');
-const sendAllSmsBtn = document.getElementById('send-all-sms');
-const refreshOrdersBtn = document.getElementById('refresh-orders-sms');
-
-// Product management elements
-const addProductBtn = document.getElementById('add-product-btn');
-
 // Print bill elements
 const printBill = document.getElementById('print-bill');
 const billDate = document.getElementById('bill-date');
 const billItems = document.getElementById('bill-items');
 const billTotal = document.getElementById('bill-total');
 
-// Owner password
-const OWNER_PASSWORD = "1234";
+// Order popup elements
+const orderPopup = document.getElementById('order-popup');
+const orderForm = document.getElementById('order-form');
+const closePopup = document.querySelector('.close-popup');
+const cancelOrder = document.getElementById('cancel-order');
+const paymentMethods = document.querySelectorAll('input[name="payment-method"]');
+const upiDetails = document.getElementById('upi-details');
+const popupOrderItems = document.getElementById('popup-order-items');
+const popupTotal = document.getElementById('popup-total');
 
 // Initialize the website
 async function init() {
     await loadProducts();
-    await loadOrders();
     setupEventListeners();
     updateCartCount();
     startCarousel();
-    showNotification('Website loaded successfully!', false);
+    showNotification('Welcome to SRS Cashews! Premium cashews from Panruti, Tamil Nadu', false);
 }
 
 // API Functions
@@ -110,101 +96,6 @@ async function loadProducts() {
     }
 }
 
-// Load orders from MongoDB
-async function loadOrders() {
-    try {
-        orders = await apiCall('/orders');
-    } catch (error) {
-        console.error('Failed to load orders from API:', error);
-        // Keep existing orders array
-    }
-}
-
-// Fallback to local products
-function loadLocalProducts() {
-    products = {
-        almonds: { 
-            id: "almonds",
-            name: "Premium California Almonds", 
-            price: 90,
-            description: "Large, crunchy California almonds with rich flavor and perfect texture.",
-            image: "https://images.unsplash.com/photo-1615485500606-f3d3f2f7fb7f?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80",
-            category: "premium"
-        },
-        cashews: { 
-            id: "cashews",
-            name: "Jumbo Whole Cashews", 
-            price: 110,
-            description: "Extra large whole cashews with creamy texture and buttery flavor.",
-            image: "https://images.unsplash.com/photo-1626074353765-517f5517d9d4?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80",
-            category: "premium"
-        },
-        walnuts: { 
-            id: "walnuts",
-            name: "Premium Walnut Halves", 
-            price: 95,
-            description: "Fresh walnut halves with rich, earthy flavor and crisp texture.",
-            image: "https://images.unsplash.com/photo-1574323347407-f5e1ad6d020b?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80",
-            category: "premium"
-        },
-        pistachios: { 
-            id: "pistachios",
-            name: "Iranian Pistachios", 
-            price: 130,
-            description: "Premium Iranian pistachios, naturally opened and lightly salted.",
-            image: "https://images.unsplash.com/photo-1615485500606-f3d3f2f7fb7f?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80",
-            category: "premium"
-        },
-        peanuts: { 
-            id: "peanuts",
-            name: "Virginia Peanuts", 
-            price: 40,
-            description: "Large Virginia peanuts, perfect for snacking and recipes.",
-            image: "https://images.unsplash.com/photo-1623650077315-9df4c0a7d3b6?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80",
-            category: "popular"
-        },
-        macadamia: { 
-            id: "macadamia",
-            name: "Hawaiian Macadamia Nuts", 
-            price: 160,
-            description: "Rich, buttery Hawaiian macadamia nuts, lightly roasted.",
-            image: "https://images.unsplash.com/photo-1574323347407-f5e1ad6d020b?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80",
-            category: "premium"
-        }
-    };
-    renderProducts();
-}
-
-// Save product to MongoDB
-async function saveProductToDB(productId, productData) {
-    try {
-        return await apiCall(`/products/${productId}`, {
-            method: 'PUT',
-            body: JSON.stringify(productData)
-        });
-    } catch (error) {
-        console.error('Error saving product, using local storage:', error);
-        // Fallback to local storage
-        products[productId] = productData;
-        return productData;
-    }
-}
-
-// Add new product to MongoDB
-async function addProductToDB(productData) {
-    try {
-        return await apiCall('/products', {
-            method: 'POST',
-            body: JSON.stringify(productData)
-        });
-    } catch (error) {
-        console.error('Error adding product, using local storage:', error);
-        // Fallback to local storage
-        products[productData.id] = productData;
-        return productData;
-    }
-}
-
 // Save order to MongoDB
 async function saveOrderToDB(orderData) {
     try {
@@ -213,11 +104,250 @@ async function saveOrderToDB(orderData) {
             body: JSON.stringify(orderData)
         });
     } catch (error) {
-        console.error('Error saving order, using local storage:', error);
-        // Fallback to local storage
-        orders.push(orderData);
-        return orderData;
+        console.error('Error saving order:', error);
+        throw error;
     }
+}
+
+// Fallback to local products with expanded selection and Tamil names
+function loadLocalProducts() {
+    products = {
+        // Premium Panruti Cashews
+        batham: { 
+            id: "batham",
+            name: "Batham Cashew Nuts", 
+            nameTamil: "பாதாம் முந்திரி",
+            price: 140,
+            description: "Premium Batham cashews with creamy texture and buttery flavor from Panruti.",
+            image: "https://images.unsplash.com/photo-1626074353765-517f5517d9d4?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80",
+            category: "cashews",
+            badge: "Panruti Special"
+        },
+        kaju: { 
+            id: "kaju",
+            name: "Jumbo Whole Cashews", 
+            nameTamil: "காஜு முந்திரி",
+            price: 130,
+            description: "Extra large whole cashews with creamy texture and buttery flavor from Panruti farms.",
+            image: "https://images.unsplash.com/photo-1626074353765-517f5517d9d4?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80",
+            category: "cashews",
+            badge: "Premium"
+        },
+        w180: { 
+            id: "w180",
+            name: "W-180 Premium Cashews", 
+            nameTamil: "W-180 முந்திரி",
+            price: 160,
+            description: "Large W-180 grade cashews, the finest quality from Panruti.",
+            image: "https://images.unsplash.com/photo-1626074353765-517f5517d9d4?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80",
+            category: "cashews",
+            badge: "Premium"
+        },
+        w210: { 
+            id: "w210",
+            name: "W-210 Cashews", 
+            nameTamil: "W-210 முந்திரி",
+            price: 150,
+            description: "Premium W-210 grade cashews from Panruti farms.",
+            image: "https://images.unsplash.com/photo-1626074353765-517f5517d9d4?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80",
+            category: "cashews",
+            badge: "Popular"
+        },
+        w240: { 
+            id: "w240",
+            name: "W-240 Cashews", 
+            nameTamil: "W-240 முந்திரி",
+            price: 140,
+            description: "Quality W-240 grade cashews, perfect for daily consumption.",
+            image: "https://images.unsplash.com/photo-1626074353765-517f5517d9d4?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80",
+            category: "cashews"
+        },
+        w320: { 
+            id: "w320",
+            name: "W-320 Cashews", 
+            nameTamil: "W-320 முந்திரி",
+            price: 130,
+            description: "Economical W-320 grade cashews from Panruti.",
+            image: "https://images.unsplash.com/photo-1626074353765-517f5517d9d4?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80",
+            category: "cashews"
+        },
+        
+        // Other Nuts
+        badam: { 
+            id: "badam",
+            name: "Premium California Almonds", 
+            nameTamil: "பாதாம்",
+            price: 120,
+            description: "Large, crunchy California almonds with rich flavor and perfect texture.",
+            image: "https://images.unsplash.com/photo-1615485500606-f3d3f2f7fb7f?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80",
+            category: "nuts",
+            badge: "Premium"
+        },
+        akhrot: { 
+            id: "akhrot",
+            name: "Premium Walnut Halves", 
+            nameTamil: "அக்ரோட்",
+            price: 110,
+            description: "Fresh walnut halves with rich, earthy flavor and crisp texture.",
+            image: "https://images.unsplash.com/photo-1574323347407-f5e1ad6d020b?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80",
+            category: "nuts"
+        },
+        pista: { 
+            id: "pista",
+            name: "Iranian Pistachios", 
+            nameTamil: "பிஸ்தா",
+            price: 160,
+            description: "Premium Iranian pistachios, naturally opened and lightly salted.",
+            image: "https://images.unsplash.com/photo-1615485500606-f3d3f2f7fb7f?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80",
+            category: "nuts",
+            badge: "Premium"
+        },
+        makhana: { 
+            id: "makhana",
+            name: "Roasted Fox Nuts", 
+            nameTamil: "மகானா",
+            price: 90,
+            description: "Lightly roasted fox nuts, perfect for healthy snacking.",
+            image: "https://images.unsplash.com/photo-1574323347407-f5e1ad6d020b?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80",
+            category: "nuts"
+        },
+        kishmish: { 
+            id: "kishmish",
+            name: "Black Raisins", 
+            nameTamil: "கிஸ்மிஸ்",
+            price: 60,
+            description: "Sweet black raisins, perfect for cooking and snacking.",
+            image: "https://images.unsplash.com/photo-1597872200969-2b65d56bd112?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80",
+            category: "dryfruits"
+        },
+        
+        // Dry Fruits
+        dates: { 
+            id: "dates",
+            name: "Medjool Dates", 
+            nameTamil: "பேரீச்சம் பழம்",
+            price: 80,
+            description: "Premium Medjool dates, naturally sweet and rich in fiber.",
+            image: "https://images.unsplash.com/photo-1597872200969-2b65d56bd112?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80",
+            category: "dryfruits",
+            badge: "Healthy"
+        },
+        blackdates: { 
+            id: "blackdates",
+            name: "Black Dates", 
+            nameTamil: "கரு பேரீச்சம் பழம்",
+            price: 95,
+            description: "Rich black dates with deep flavor and nutritional benefits.",
+            image: "https://images.unsplash.com/photo-1597872200969-2b65d56bd112?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80",
+            category: "dryfruits"
+        },
+        anjeer: { 
+            id: "anjeer",
+            name: "Dried Figs", 
+            nameTamil: "அத்தி பழம்",
+            price: 110,
+            description: "Natural dried figs, rich in fiber and essential nutrients.",
+            image: "https://images.unsplash.com/photo-1597872200969-2b65d56bd112?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80",
+            category: "dryfruits"
+        },
+        apricot: { 
+            id: "apricot",
+            name: "Dried Apricots", 
+            nameTamil: "சர்க்கரை பாதாமி",
+            price: 85,
+            description: "Sun-dried apricots with natural sweetness and chewy texture.",
+            image: "https://images.unsplash.com/photo-1597872200969-2b65d56bd112?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80",
+            category: "dryfruits"
+        },
+        prune: { 
+            id: "prune",
+            name: "Dried Prunes", 
+            nameTamil: "உலர்ந்த ப்ளம்",
+            price: 75,
+            description: "Natural dried prunes, great for digestive health.",
+            image: "https://images.unsplash.com/photo-1597872200969-2b65d56bd112?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80",
+            category: "dryfruits"
+        },
+        
+        // Seeds
+        pumpkineseeds: { 
+            id: "pumpkineseeds",
+            name: "Pumpkin Seeds", 
+            nameTamil: "பூசணி விதைகள்",
+            price: 70,
+            description: "Roasted pumpkin seeds, rich in zinc and magnesium.",
+            image: "https://images.unsplash.com/photo-1623650077315-9df4c0a7d3b6?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80",
+            category: "seeds",
+            badge: "Popular"
+        },
+        sunflowerseeds: { 
+            id: "sunflowerseeds",
+            name: "Sunflower Seeds", 
+            nameTamil: "சூரியகாந்தி விதைகள்",
+            price: 55,
+            description: "Raw sunflower seeds, packed with vitamin E and healthy fats.",
+            image: "https://images.unsplash.com/photo-1623650077315-9df4c0a7d3b6?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80",
+            category: "seeds"
+        },
+        flaxseeds: { 
+            id: "flaxseeds",
+            name: "Flax Seeds", 
+            nameTamil: "அளசி விதைகள்",
+            price: 65,
+            description: "Organic flax seeds, excellent source of omega-3 fatty acids.",
+            image: "https://images.unsplash.com/photo-1623650077315-9df4c0a7d3b6?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80",
+            category: "seeds"
+        },
+        chia: { 
+            id: "chia",
+            name: "Chia Seeds", 
+            nameTamil: "சியா விதைகள்",
+            price: 90,
+            description: "Premium chia seeds, high in fiber and antioxidants.",
+            image: "https://images.unsplash.com/photo-1623650077315-9df4c0a7d3b6?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80",
+            category: "seeds"
+        },
+        sesame: { 
+            id: "sesame",
+            name: "Sesame Seeds", 
+            nameTamil: "எள்ளு",
+            price: 50,
+            description: "Natural sesame seeds, rich in calcium and antioxidants.",
+            image: "https://images.unsplash.com/photo-1623650077315-9df4c0a7d3b6?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80",
+            category: "seeds"
+        },
+        
+        // Premium Category
+        macadamia: { 
+            id: "macadamia",
+            name: "Hawaiian Macadamia Nuts", 
+            nameTamil: "மக்கடாமியா",
+            price: 200,
+            description: "Rich, buttery Hawaiian macadamia nuts, lightly roasted.",
+            image: "https://images.unsplash.com/photo-1574323347407-f5e1ad6d020b?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80",
+            category: "premium",
+            badge: "Premium"
+        },
+        brazil: { 
+            id: "brazil",
+            name: "Brazil Nuts", 
+            nameTamil: "பிரேசில் கொட்டை",
+            price: 180,
+            description: "Large Brazil nuts, excellent source of selenium.",
+            image: "https://images.unsplash.com/photo-1574323347407-f5e1ad6d020b?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80",
+            category: "premium"
+        },
+        pecans: { 
+            id: "pecans",
+            name: "Pecan Nuts", 
+            nameTamil: "பிகான் கொட்டை",
+            price: 170,
+            description: "Sweet and buttery pecan nuts, perfect for baking.",
+            image: "https://images.unsplash.com/photo-1574323347407-f5e1ad6d020b?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80",
+            category: "premium"
+        }
+    };
+    renderProducts();
 }
 
 // CAROUSEL FUNCTIONS
@@ -267,8 +397,10 @@ function renderProducts(filter = 'all', searchTerm = '') {
             continue;
         }
         
-        if (searchTerm && !product.name.toLowerCase().includes(searchTerm.toLowerCase()) && 
-            !product.description.toLowerCase().includes(searchTerm.toLowerCase())) {
+        if (searchTerm && 
+            !product.name.toLowerCase().includes(searchTerm.toLowerCase()) && 
+            !product.description.toLowerCase().includes(searchTerm.toLowerCase()) &&
+            !(product.nameTamil && product.nameTamil.toLowerCase().includes(searchTerm.toLowerCase()))) {
             continue;
         }
         
@@ -282,10 +414,12 @@ function renderProducts(filter = 'all', searchTerm = '') {
         productCard.className = 'product-card';
         productCard.innerHTML = `
             <div class="product-image">
-                <img src="${product.image}" alt="${product.name}" onerror="this.src='https://via.placeholder.com/320x250?text=Nut+Image'">
+                <img src="${product.image}" alt="${product.name}" onerror="this.src='https://via.placeholder.com/320x250?text=SRS+Cashews'">
+                ${product.badge ? `<div class="product-badge">${product.badge}</div>` : ''}
             </div>
             <div class="product-info">
                 <h3 class="product-name">${product.name}</h3>
+                ${product.nameTamil ? `<div class="product-name-tamil">${product.nameTamil}</div>` : ''}
                 <p class="product-description">${product.description}</p>
                 <div class="product-price">₹${product.price} / 50g</div>
                 <div class="quantity-selector">
@@ -294,7 +428,10 @@ function renderProducts(filter = 'all', searchTerm = '') {
                     <button class="quantity-btn plus" data-product="${productId}">+</button>
                 </div>
                 <div class="quantity-label">Quantity (50g increments)</div>
-                <button class="add-to-cart" data-product="${productId}">Add to Cart</button>
+                <button class="add-to-cart" data-product="${productId}">
+                    <i class="fas fa-shopping-cart"></i>
+                    Add to Cart
+                </button>
             </div>
         `;
         
@@ -302,13 +439,18 @@ function renderProducts(filter = 'all', searchTerm = '') {
     }
     
     if (Object.keys(filteredProducts).length === 0) {
-        productsGrid.innerHTML = '<p style="text-align: center; width: 100%; padding: 40px;">No nuts found matching your criteria.</p>';
+        productsGrid.innerHTML = `
+            <div class="empty-products" style="grid-column: 1/-1; text-align: center; padding: 4rem;">
+                <i class="fas fa-search" style="font-size: 4rem; color: #475569; margin-bottom: 1rem;"></i>
+                <h3 style="color: #94a3b8; margin-bottom: 1rem;">No products found</h3>
+                <p style="color: #64748b;">Try adjusting your search or filter criteria</p>
+            </div>
+        `;
     }
     
     setupProductEventListeners();
 }
 
-// Setup product event listeners - MISSING FUNCTION ADDED
 function setupProductEventListeners() {
     // Quantity buttons
     const quantityBtns = document.querySelectorAll('.quantity-btn');
@@ -362,6 +504,7 @@ function addToCart(productId) {
     } else {
         cart[productId] = {
             name: product.name,
+            nameTamil: product.nameTamil,
             price: product.price,
             quantity: quantity,
             total: totalPrice,
@@ -388,10 +531,11 @@ function updateCart() {
             const item = cart[productId];
             
             const cartItem = document.createElement('div');
-            cartItem.className = 'cart-item';
+            cartItem.className = 'cart-item cart-item-add';
             cartItem.innerHTML = `
                 <div class="cart-item-info">
                     <h4>${item.name}</h4>
+                    ${item.nameTamil ? `<p class="product-name-tamil">${item.nameTamil}</p>` : ''}
                     <p>₹${item.price} per 50g</p>
                 </div>
                 <div class="cart-item-controls">
@@ -460,7 +604,8 @@ function updateCartTotal() {
         subtotal += cart[productId].total;
     }
     
-    const total = subtotal;
+    const shipping = 50;
+    const total = subtotal + shipping;
     
     subtotalElement.textContent = `₹${subtotal.toFixed(2)}`;
     totalElement.textContent = `₹${total.toFixed(2)}`;
@@ -476,28 +621,73 @@ function updateCartCount() {
     cartCount.textContent = totalItems;
 }
 
-// ORDER FUNCTIONS
-async function placeOrder() {
+// ORDER POPUP FUNCTIONS
+function placeOrder() {
     if (Object.keys(cart).length === 0) {
-        showNotification('Your cart is empty. Add some premium nuts first!', true);
+        showNotification('Your cart is empty. Add some premium Panruti products first!', true);
         return;
     }
     
-    const customerName = prompt('Please enter your name for the order:');
+    // Update popup order summary
+    updatePopupOrderSummary();
     
-    if (!customerName) {
-        showNotification('Order cancelled. Name is required.', true);
-        return;
-    }
-    
+    // Show the popup
+    orderPopup.classList.add('active');
+    document.body.style.overflow = 'hidden'; // Prevent background scrolling
+}
+
+function updatePopupOrderSummary() {
+    popupOrderItems.innerHTML = '';
     let total = 0;
-    const orderItems = [];
     
     for (const productId in cart) {
         const item = cart[productId];
+        const orderItem = document.createElement('div');
+        orderItem.className = 'popup-order-item';
+        orderItem.innerHTML = `
+            <span>${item.name} (${item.quantity} × 50g)</span>
+            <span>₹${item.total.toFixed(2)}</span>
+        `;
+        popupOrderItems.appendChild(orderItem);
         total += item.total;
-        orderItems.push({
+    }
+    
+    // Add shipping cost
+    const shipping = 50;
+    total += shipping;
+    
+    const shippingItem = document.createElement('div');
+    shippingItem.className = 'popup-order-item';
+    shippingItem.innerHTML = `
+        <span>Shipping</span>
+        <span>₹${shipping.toFixed(2)}</span>
+    `;
+    popupOrderItems.appendChild(shippingItem);
+    
+    popupTotal.textContent = total.toFixed(2);
+}
+
+async function confirmOrder(formData) {
+    const orderData = {
+        customerName: formData.get('customer-name'),
+        customerPhone: formData.get('customer-phone'),
+        customerAddress: formData.get('customer-address'),
+        customerPincode: formData.get('customer-pincode'),
+        customerPlace: formData.get('customer-place'),
+        paymentMethod: formData.get('payment-method'),
+        date: new Date().toISOString(),
+        items: [],
+        total: parseFloat(popupTotal.textContent),
+        status: 'pending',
+        source: 'SRS Cashews Website'
+    };
+    
+    // Add cart items to order data
+    for (const productId in cart) {
+        const item = cart[productId];
+        orderData.items.push({
             name: item.name,
+            nameTamil: item.nameTamil,
             price: item.price,
             quantity: item.quantity,
             total: item.total,
@@ -505,342 +695,186 @@ async function placeOrder() {
         });
     }
     
-    const order = {
-        customerName: customerName,
-        date: new Date().toISOString(),
-        items: orderItems,
-        total: total,
-        status: 'pending'
-    };
-    
     try {
-        await saveOrderToDB(order);
+        await saveOrderToDB(orderData);
         
         // Clear cart
         cart = {};
         updateCart();
         
-        showNotification('Order placed successfully! The owner has been notified.');
-        
-        // Refresh orders in owner portal
-        if (ownerContent.style.display !== 'none') {
-            await loadOrders();
-            renderOrderHistory();
+        // Show appropriate success message
+        if (orderData.paymentMethod === 'cod') {
+            showNotification(`Order placed successfully, ${orderData.customerName}! Your order will be delivered to ${orderData.customerPlace}. We will contact you on ${orderData.customerPhone}. Payment: Cash on Delivery`);
+        } else {
+            showNotification(`Order placed successfully, ${orderData.customerName}! Please complete the UPI payment and send screenshot to 9488588456. We will process your order once payment is confirmed.`);
         }
+        
+        // Close popup
+        closeOrderPopup();
+        
     } catch (error) {
-        showNotification('Order placed locally. There was an issue connecting to the server.', true);
+        showNotification('Failed to place order. Please call us directly at +91 98765 43210', true);
     }
 }
 
-// OWNER PORTAL FUNCTIONS
-function renderOwnerForms() {
-    productForms.innerHTML = '';
-    
-    for (const productId in products) {
-        const product = products[productId];
-        
-        const form = document.createElement('div');
-        form.className = 'product-edit-form';
-        form.innerHTML = `
-            <div>
-                <div class="form-group">
-                    <label for="${productId}-name">Nut Name</label>
-                    <input type="text" class="form-control" id="${productId}-name" value="${product.name}">
-                </div>
-                <div class="form-group">
-                    <label for="${productId}-description">Description</label>
-                    <textarea class="form-control" id="${productId}-description">${product.description}</textarea>
-                </div>
-            </div>
-            <div>
-                <div class="form-group">
-                    <label for="${productId}-price">Price (₹ per 50g)</label>
-                    <input type="number" class="form-control" id="${productId}-price" value="${product.price}">
-                </div>
-                <div class="form-group">
-                    <label for="${productId}-category">Category</label>
-                    <select class="form-control" id="${productId}-category">
-                        <option value="popular" ${product.category === 'popular' ? 'selected' : ''}>Popular</option>
-                        <option value="premium" ${product.category === 'premium' ? 'selected' : ''}>Premium</option>
-                    </select>
-                </div>
-            </div>
-            <div class="product-image-section">
-                <div class="current-image">
-                    <h5>Current Image</h5>
-                    <img src="${product.image}" alt="${product.name}" onerror="this.src='https://via.placeholder.com/200x150?text=Nut+Image'">
-                </div>
-                <div class="image-url-input">
-                    <label for="${productId}-image">Product Image URL</label>
-                    <input type="text" class="form-control" id="${productId}-image" value="${product.image}" 
-                           placeholder="Enter image URL" oninput="updateImagePreview('${productId}')">
-                    <div class="image-preview-container">
-                        <div class="image-preview" id="${productId}-preview">
-                            <span>New image preview will appear here</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        `;
-        
-        productForms.appendChild(form);
-    }
+function closeOrderPopup() {
+    orderPopup.classList.remove('active');
+    document.body.style.overflow = ''; // Restore scrolling
+    orderForm.reset();
+    upiDetails.style.display = 'none';
 }
 
-async function saveProductChanges() {
-    const updates = [];
-    
-    for (const productId in products) {
-        const name = document.getElementById(`${productId}-name`).value.trim();
-        const description = document.getElementById(`${productId}-description`).value.trim();
-        const price = parseInt(document.getElementById(`${productId}-price`).value);
-        const category = document.getElementById(`${productId}-category`).value;
-        const image = document.getElementById(`${productId}-image`).value.trim();
-        
-        const productData = {
-            id: productId,
-            name,
-            price,
-            category,
-            description,
-            image
-        };
-        
-        updates.push(saveProductToDB(productId, productData));
-    }
-    
-    try {
-        await Promise.all(updates);
-        await loadProducts(); // Reload products to ensure consistency
-        showNotification('All product changes saved successfully!');
-    } catch (error) {
-        showNotification('Some changes may not have been saved to the server.', true);
-    }
-}
-
-async function addNewProduct() {
-    const name = document.getElementById('new-product-name').value.trim();
-    const price = parseInt(document.getElementById('new-product-price').value);
-    const category = document.getElementById('new-product-category').value;
-    const description = document.getElementById('new-product-description').value.trim();
-    const image = document.getElementById('new-product-image').value.trim();
-    
-    if (!name || !price || !description || !image) {
-        showNotification('Please fill in all product details.', true);
-        return;
-    }
-    
-    if (price <= 0) {
-        showNotification('Price must be a positive number.', true);
-        return;
-    }
-    
-    const productId = name.toLowerCase().replace(/\s+/g, '-');
-    
-    const productData = {
-        id: productId,
-        name,
-        price,
-        category,
-        description,
-        image
-    };
-    
-    try {
-        await addProductToDB(productData);
-        
-        // Clear form
-        document.getElementById('new-product-name').value = '';
-        document.getElementById('new-product-price').value = '';
-        document.getElementById('new-product-description').value = '';
-        document.getElementById('new-product-image').value = '';
-        document.getElementById('new-product-preview').innerHTML = '<span>Image preview will appear here</span>';
-        document.getElementById('new-product-preview').classList.remove('has-image');
-        
-        // Reload products
-        await loadProducts();
-        renderOwnerForms();
-        
-        showNotification('New nut product added successfully!');
-    } catch (error) {
-        showNotification('Product added locally. There was an issue connecting to the server.', true);
-    }
-}
-
-function renderOrderHistory() {
-    orderList.innerHTML = '';
-    
-    if (orders.length === 0) {
-        noOrdersMessage.style.display = 'block';
-        return;
-    }
-    
-    noOrdersMessage.style.display = 'none';
-    
-    // Sort orders by date (newest first)
-    const sortedOrders = [...orders].sort((a, b) => new Date(b.date) - new Date(a.date));
-    
-    sortedOrders.forEach(order => {
-        const orderItem = document.createElement('div');
-        orderItem.className = 'order-item';
-        
-        let itemsHtml = '';
-        order.items.forEach(item => {
-            itemsHtml += `
-                <div class="order-item-row">
-                    <span>${item.name}</span>
-                    <span>${item.quantity}g × ₹${item.price}/50g = ₹${item.total.toFixed(2)}</span>
-                </div>
-            `;
-        });
-        
-        orderItem.innerHTML = `
-            <div class="order-header">
-                <div class="order-customer">${order.customerName}</div>
-                <div class="order-date">${new Date(order.date).toLocaleString()}</div>
-            </div>
-            <div class="order-items">
-                ${itemsHtml}
-            </div>
-            <div class="order-total">Total: ₹${order.total.toFixed(2)}</div>
-        `;
-        
-        orderList.appendChild(orderItem);
+function copyUPI() {
+    const upiId = 'vdcjhsvdcd@upi';
+    navigator.clipboard.writeText(upiId).then(() => {
+        showNotification('UPI ID copied to clipboard!');
+    }).catch(() => {
+        // Fallback for older browsers
+        const textArea = document.createElement('textarea');
+        textArea.value = upiId;
+        document.body.appendChild(textArea);
+        textArea.select();
+        document.execCommand('copy');
+        document.body.removeChild(textArea);
+        showNotification('UPI ID copied to clipboard!');
     });
 }
 
-function renderOrderNotifications() {
-    orderNotifications.innerHTML = '';
-    
-    if (orders.length === 0) {
-        noNotificationsMessage.style.display = 'block';
-        orderNotifications.appendChild(noNotificationsMessage);
-        return;
-    }
-    
-    noNotificationsMessage.style.display = 'none';
-    
-    // Sort orders by date (newest first)
-    const sortedOrders = [...orders].sort((a, b) => new Date(b.date) - new Date(a.date));
-    
-    sortedOrders.forEach(order => {
-        const notification = document.createElement('div');
-        notification.className = 'order-notification';
-        notification.innerHTML = `
-            <div class="notification-header">
-                <div class="customer-name">${order.customerName}</div>
-                <div class="order-time">${new Date(order.date).toLocaleString()}</div>
-            </div>
-            <div class="order-details">
-                <div class="order-items-list">
-                    ${order.items.map(item => 
-                        `${item.quantity}g ${item.name} - ₹${item.total.toFixed(2)}`
-                    ).join('<br>')}
-                </div>
-                <div class="order-total">Total: ₹${order.total.toFixed(2)}</div>
-            </div>
-            <div class="sms-actions">
-                <button class="btn btn-sms-action" onclick="sendSMSNotification('${order.customerName}', ${order.total})">
-                    Send SMS
-                </button>
-                <button class="btn btn-sms-action btn-secondary" onclick="viewOrderDetails('${order._id || order.id}')">
-                    View Details
-                </button>
-            </div>
-        `;
-        
-        orderNotifications.appendChild(notification);
-    });
-}
-
-// Update image preview for product forms
-function updateImagePreview(productId) {
-    const imageUrl = document.getElementById(`${productId}-image`).value;
-    const preview = document.getElementById(`${productId}-preview`);
-    
-    if (imageUrl) {
-        preview.innerHTML = `<img src="${imageUrl}" alt="Preview" onerror="this.parentElement.innerHTML='<span>Invalid image URL</span>'">`;
-        preview.classList.add('has-image');
-    } else {
-        preview.innerHTML = '<span>Image preview will appear here</span>';
-        preview.classList.remove('has-image');
-    }
-}
-
-// Update new product image preview
-function updateNewProductPreview() {
-    const imageUrl = document.getElementById('new-product-image').value;
-    const preview = document.getElementById('new-product-preview');
-    
-    if (imageUrl) {
-        preview.innerHTML = `<img src="${imageUrl}" alt="Preview" onerror="this.parentElement.innerHTML='<span>Invalid image URL</span>'">`;
-        preview.classList.add('has-image');
-    } else {
-        preview.innerHTML = '<span>Image preview will appear here</span>';
-        preview.classList.remove('has-image');
-    }
-}
-
-// Send SMS notification
-function sendSMSNotification(customerName, total) {
-    // Simulate SMS sending
-    const message = `Hi ${customerName}, your nut order of ₹${total.toFixed(2)} has been confirmed! Thank you for choosing Netus Bissnus.`;
-    
-    // Show notification
-    showNotification(`SMS sent to ${customerName}: ${message}`);
-    
-    // In a real application, you would integrate with an SMS API here
-    console.log('SMS Message:', message);
-}
-
-// Send SMS to all customers
-function sendSMSToAll() {
-    if (orders.length === 0) {
-        showNotification('No orders to send SMS to.', true);
-        return;
-    }
-    
-    // Get unique customers
-    const uniqueCustomers = [...new Set(orders.map(order => order.customerName))];
-    
-    uniqueCustomers.forEach(customer => {
-        const customerOrders = orders.filter(order => order.customerName === customer);
-        const totalSpent = customerOrders.reduce((sum, order) => sum + order.total, 0);
-        
-        const message = `Hi ${customer}, thank you for your recent orders totaling ₹${totalSpent.toFixed(2)}! We appreciate your business at Netus Bissnus.`;
-        
-        // Simulate SMS sending
-        console.log(`SMS to ${customer}:`, message);
-    });
-    
-    showNotification(`SMS notifications sent to ${uniqueCustomers.length} customers`);
-}
-
-// View order details
-function viewOrderDetails(orderId) {
-    const order = orders.find(o => o._id === orderId || o.id === orderId);
-    if (order) {
-        const itemsList = order.items.map(item => 
-            `${item.quantity}g ${item.name} - ₹${item.total.toFixed(2)}`
-        ).join('\n');
-        
-        alert(`Order Details for ${order.customerName}:\n\n${itemsList}\n\nTotal: ₹${order.total.toFixed(2)}\nDate: ${new Date(order.date).toLocaleString()}`);
-    }
-}
-
-// Print order summary
+// PRINT FUNCTION
 function printOrderSummary() {
     if (Object.keys(cart).length === 0) {
-        showNotification('Your cart is empty. Add some premium nuts first!', true);
+        showNotification('Your cart is empty. Add some premium Panruti products first!', true);
         return;
     }
     
-    // Update bill content
-    billDate.textContent = new Date().toLocaleString();
+    // Create print window
+    const printWindow = window.open('', '_blank');
+    const printContent = `
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <title>SRS Cashews - Order Bill</title>
+            <style>
+                body {
+                    font-family: Arial, sans-serif;
+                    color: black;
+                    background: white;
+                    margin: 0;
+                    padding: 20px;
+                }
+                .print-bill {
+                    max-width: 400px;
+                    margin: 0 auto;
+                    padding: 20px;
+                    border: 2px solid black;
+                }
+                .bill-header {
+                    text-align: center;
+                    margin-bottom: 20px;
+                    border-bottom: 2px solid black;
+                    padding-bottom: 15px;
+                }
+                .bill-header h2 {
+                    margin: 0 0 5px 0;
+                    color: black;
+                    font-size: 24px;
+                }
+                .bill-header p {
+                    margin: 5px 0;
+                    color: black;
+                }
+                .bill-date {
+                    color: #666;
+                    font-size: 14px;
+                }
+                .bill-item {
+                    display: flex;
+                    justify-content: space-between;
+                    margin-bottom: 10px;
+                    padding-bottom: 8px;
+                    border-bottom: 1px dashed #ccc;
+                    color: black;
+                }
+                .bill-item-name {
+                    flex: 2;
+                }
+                .bill-item-quantity {
+                    flex: 1;
+                    text-align: center;
+                }
+                .bill-item-price {
+                    flex: 1;
+                    text-align: right;
+                }
+                .bill-divider {
+                    height: 2px;
+                    background: black;
+                    margin: 15px 0;
+                }
+                .bill-total {
+                    display: flex;
+                    justify-content: space-between;
+                    font-weight: bold;
+                    font-size: 18px;
+                    color: black;
+                    margin-bottom: 20px;
+                }
+                .bill-footer {
+                    text-align: center;
+                    color: #666;
+                    font-size: 14px;
+                }
+                .bill-footer p {
+                    margin: 5px 0;
+                }
+                @media print {
+                    body { margin: 0; }
+                    .print-bill { border: none; box-shadow: none; }
+                }
+            </style>
+        </head>
+        <body>
+            <div class="print-bill">
+                <div class="bill-header">
+                    <h2>SRS CASHEWS</h2>
+                    <p>Premium Cashews from Panruti, Tamil Nadu</p>
+                    <div class="bill-date">${new Date().toLocaleString()}</div>
+                </div>
+                
+                <div class="bill-items">
+                    ${generateBillItems()}
+                </div>
+                
+                <div class="bill-divider"></div>
+                
+                <div class="bill-total">
+                    <span>TOTAL:</span>
+                    <span>₹${calculateTotal().toFixed(2)}</span>
+                </div>
+                
+                <div class="bill-footer">
+                    <p>Thank you for choosing SRS Cashews!</p>
+                    <p>From Panruti with Love ❤️</p>
+                </div>
+            </div>
+        </body>
+        </html>
+    `;
     
+    printWindow.document.write(printContent);
+    printWindow.document.close();
+    
+    // Wait for content to load then print
+    printWindow.onload = function() {
+        printWindow.print();
+        printWindow.onafterprint = function() {
+            printWindow.close();
+        };
+    };
+}
+
+function generateBillItems() {
     let itemsHtml = '';
-    let total = 0;
-    
     for (const productId in cart) {
         const item = cart[productId];
         itemsHtml += `
@@ -850,26 +884,30 @@ function printOrderSummary() {
                 <div class="bill-item-price">₹${item.total.toFixed(2)}</div>
             </div>
         `;
-        total += item.total;
     }
     
-    billItems.innerHTML = itemsHtml;
-    billTotal.textContent = `₹${total.toFixed(2)}`;
+    // Add shipping
+    const shipping = 50;
+    itemsHtml += `
+        <div class="bill-item">
+            <div class="bill-item-name">Shipping</div>
+            <div class="bill-item-quantity"></div>
+            <div class="bill-item-price">₹${shipping.toFixed(2)}</div>
+        </div>
+    `;
     
-    // Show print dialog
-    const printContent = printBill.innerHTML;
-    const originalContent = document.body.innerHTML;
-    
-    document.body.innerHTML = printContent;
-    window.print();
-    document.body.innerHTML = originalContent;
-    
-    // Re-initialize event listeners
-    setupEventListeners();
-    updateCart();
+    return itemsHtml;
 }
 
-// Show notification
+function calculateTotal() {
+    let total = 0;
+    for (const productId in cart) {
+        total += cart[productId].total;
+    }
+    return total + 50; // Add shipping
+}
+
+// NOTIFICATION FUNCTION
 function showNotification(message, isError = false) {
     notification.textContent = message;
     notification.className = 'notification';
@@ -882,10 +920,10 @@ function showNotification(message, isError = false) {
     
     setTimeout(() => {
         notification.classList.remove('show');
-    }, 3000);
+    }, 4000);
 }
 
-// Show page
+// PAGE NAVIGATION
 function showPage(pageId) {
     // Hide all pages
     pages.forEach(page => {
@@ -896,151 +934,41 @@ function showPage(pageId) {
     const activePage = document.getElementById(pageId);
     activePage.classList.add('active');
     
-    // Special handling for SMS page
-    if (pageId === 'sms') {
-        renderOrderNotifications();
-    }
-    
-    // Special handling for owner page
-    if (pageId === 'owner') {
-        // Reset owner portal state
-        passwordSection.style.display = 'block';
-        ownerContent.style.display = 'none';
-        ownerPassword.value = '';
-    }
+    // Scroll to top when changing pages
+    window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
-// Owner portal login
-function loginToOwnerPortal() {
-    const password = ownerPassword.value;
-    
-    if (password === OWNER_PASSWORD) {
-        passwordSection.style.display = 'none';
-        ownerContent.style.display = 'block';
-        
-        // Render owner forms and order history
-        renderOwnerForms();
-        renderOrderHistory();
-        
-        showNotification('Welcome to the Owner Portal!');
-    } else {
-        showNotification('Incorrect password. Please try again.', true);
-    }
-}
-
-// Owner portal logout
-function logoutFromOwnerPortal() {
-    passwordSection.style.display = 'block';
-    ownerContent.style.display = 'none';
-    ownerPassword.value = '';
-    
-    showNotification('Logged out successfully.');
-}
-
-
-// Add this function to delete products
-async function deleteProduct(productId) {
-    if (confirm(`Are you sure you want to delete "${products[productId].name}"? This action cannot be undone.`)) {
-        try {
-            await apiCall(`/products/${productId}`, {
-                method: 'DELETE'
-            });
-            
-            // Remove from local products
-            delete products[productId];
-            
-            // Update the display
-            renderProducts();
-            renderOwnerForms();
-            
-            showNotification('Product deleted successfully!');
-        } catch (error) {
-            console.error('Error deleting product:', error);
-            showNotification('Failed to delete product from server.', true);
-        }
-    }
-}
-
-// Update the renderOwnerForms function to include delete buttons
-function renderOwnerForms() {
-    productForms.innerHTML = '';
-    
-    for (const productId in products) {
-        const product = products[productId];
-        
-        const form = document.createElement('div');
-        form.className = 'product-edit-form';
-        form.innerHTML = `
-            <div>
-                <div class="form-group">
-                    <label for="${productId}-name">Nut Name</label>
-                    <input type="text" class="form-control" id="${productId}-name" value="${product.name}">
-                </div>
-                <div class="form-group">
-                    <label for="${productId}-description">Description</label>
-                    <textarea class="form-control" id="${productId}-description">${product.description}</textarea>
-                </div>
-            </div>
-            <div>
-                <div class="form-group">
-                    <label for="${productId}-price">Price (₹ per 50g)</label>
-                    <input type="number" class="form-control" id="${productId}-price" value="${product.price}">
-                </div>
-                <div class="form-group">
-                    <label for="${productId}-category">Category</label>
-                    <select class="form-control" id="${productId}-category">
-                        <option value="popular" ${product.category === 'popular' ? 'selected' : ''}>Popular</option>
-                        <option value="premium" ${product.category === 'premium' ? 'selected' : ''}>Premium</option>
-                    </select>
-                </div>
-            </div>
-            <div class="product-image-section">
-                <div class="current-image">
-                    <h5>Current Image</h5>
-                    <img src="${product.image}" alt="${product.name}" onerror="this.src='https://via.placeholder.com/200x150?text=Nut+Image'">
-                </div>
-                <div class="image-url-input">
-                    <label for="${productId}-image">Product Image URL</label>
-                    <input type="text" class="form-control" id="${productId}-image" value="${product.image}" 
-                           placeholder="Enter image URL" oninput="updateImagePreview('${productId}')">
-                    <div class="image-preview-container">
-                        <div class="image-preview" id="${productId}-preview">
-                            <span>New image preview will appear here</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="product-actions">
-                <button class="btn btn-danger" onclick="deleteProduct('${productId}')">
-                    <i class="fas fa-trash"></i> Delete Product
-                </button>
-            </div>
-        `;
-        
-        productForms.appendChild(form);
-    }
-}
-
-// Refresh orders
-function refreshOrders() {
-    renderOrderHistory();
-    renderOrderNotifications();
-    showNotification('Orders refreshed!');
-}
-
-
-
-
-
-
-// Setup event listeners - MISSING FUNCTION ADDED
+// EVENT LISTENERS SETUP
 function setupEventListeners() {
     // Navigation
     navLinks.forEach(link => {
         link.addEventListener('click', (e) => {
-            e.preventDefault();
-            const pageId = link.getAttribute('data-page');
-            showPage(pageId);
+            if (link.getAttribute('data-page')) {
+                e.preventDefault();
+                const pageId = link.getAttribute('data-page');
+                showPage(pageId);
+            }
+        });
+    });
+    
+    // Contact button
+    document.getElementById('contact-btn').addEventListener('click', (e) => {
+        e.preventDefault();
+        alert('SRS Cashews - Premium Cashews from Panruti\n\n📧 Email: srscashews@gmail.com\n📞 Phone: +91 98765 43210\n📍 Location: Panruti, Cuddalore District, Tamil Nadu - 607106\n\nWe deliver across India! 🚚');
+    });
+    
+    // Category cards
+    categoryCards.forEach(card => {
+        card.addEventListener('click', () => {
+            const filter = card.getAttribute('data-filter');
+            showPage('products');
+            
+            // Set active filter
+            setTimeout(() => {
+                filterButtons.forEach(btn => btn.classList.remove('active'));
+                document.querySelector(`.filter-btn[data-filter="${filter}"]`).classList.add('active');
+                renderProducts(filter, productSearch.value);
+            }, 100);
         });
     });
     
@@ -1078,24 +1006,95 @@ function setupEventListeners() {
     placeOrderBtn.addEventListener('click', placeOrder);
     printSummaryBtn.addEventListener('click', printOrderSummary);
     
-    // Owner portal
-    loginBtn.addEventListener('click', loginToOwnerPortal);
-    logoutBtn.addEventListener('click', logoutFromOwnerPortal);
-    saveChangesBtn.addEventListener('click', saveProductChanges);
+    // Order popup events
+    closePopup.addEventListener('click', closeOrderPopup);
+    cancelOrder.addEventListener('click', closeOrderPopup);
     
-    // SMS page
-    sendAllSmsBtn.addEventListener('click', sendSMSToAll);
-    refreshOrdersBtn.addEventListener('click', refreshOrders);
+    // Close popup when clicking outside
+    orderPopup.addEventListener('click', (e) => {
+        if (e.target === orderPopup) {
+            closeOrderPopup();
+        }
+    });
     
-    // Product management
-    addProductBtn.addEventListener('click', addNewProduct);
+    // Payment method change
+    paymentMethods.forEach(radio => {
+        radio.addEventListener('change', (e) => {
+            if (e.target.value === 'online') {
+                upiDetails.style.display = 'block';
+            } else {
+                upiDetails.style.display = 'none';
+            }
+        });
+    });
     
-    // New product image preview
-    document.getElementById('new-product-image').addEventListener('input', updateNewProductPreview);
+    // Order form submission
+    orderForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const formData = new FormData(orderForm);
+        confirmOrder(formData);
+    });
     
-    // Refresh orders button in owner portal
-    document.getElementById('refresh-orders').addEventListener('click', refreshOrders);
+    // Keyboard shortcuts
+    document.addEventListener('keydown', (e) => {
+        // ESC key to close notification and popup
+        if (e.key === 'Escape') {
+            notification.classList.remove('show');
+            if (orderPopup.classList.contains('active')) {
+                closeOrderPopup();
+            }
+        }
+        
+        // Ctrl+P for print summary
+        if (e.ctrlKey && e.key === 'p') {
+            e.preventDefault();
+            printOrderSummary();
+        }
+    });
+    
+    // Smooth scroll for anchor links
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener('click', function (e) {
+            e.preventDefault();
+            const target = document.querySelector(this.getAttribute('href'));
+            if (target) {
+                target.scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'start'
+                });
+            }
+        });
+    });
 }
 
 // Initialize the website when DOM is loaded
 document.addEventListener('DOMContentLoaded', init);
+
+// Export functions for global access
+window.updateImagePreview = function(productId) {
+    const imageUrl = document.getElementById(`${productId}-image`).value;
+    const preview = document.getElementById(`${productId}-preview`);
+    
+    if (imageUrl) {
+        preview.innerHTML = `<img src="${imageUrl}" alt="Preview" onerror="this.parentElement.innerHTML='<span>Invalid image URL</span>'">`;
+        preview.classList.add('has-image');
+    } else {
+        preview.innerHTML = '<span>Image preview will appear here</span>';
+        preview.classList.remove('has-image');
+    }
+};
+
+window.updateNewProductPreview = function() {
+    const imageUrl = document.getElementById('new-product-image').value;
+    const preview = document.getElementById('new-product-preview');
+    
+    if (imageUrl) {
+        preview.innerHTML = `<img src="${imageUrl}" alt="Preview" onerror="this.parentElement.innerHTML='<span>Invalid image URL</span>'">`;
+        preview.classList.add('has-image');
+    } else {
+        preview.innerHTML = '<span>Image preview will appear here</span>';
+        preview.classList.remove('has-image');
+    }
+};
+
+window.copyUPI = copyUPI;
