@@ -41,7 +41,7 @@ body {
 }
 
 .container {
-    max-width: 1200px;
+    max-width: 1400px;
     margin: 0 auto;
     padding: 0 20px;
 }
@@ -296,10 +296,55 @@ nav a:hover {
 
 /* Owner Dashboard */
 .owner-dashboard {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 2rem;
+    display: block;
     margin-bottom: 2rem;
+}
+
+/* Owner Tabs */
+.owner-tabs {
+    display: flex;
+    background: rgba(15, 23, 42, 0.8);
+    border-radius: var(--radius);
+    padding: 0.5rem;
+    margin-bottom: 2rem;
+    border: 1px solid var(--border-light);
+}
+
+.owner-tab {
+    flex: 1;
+    padding: 1rem 1.5rem;
+    background: transparent;
+    border: none;
+    color: #94a3b8;
+    font-weight: 600;
+    cursor: pointer;
+    transition: var(--transition);
+    border-radius: 6px;
+}
+
+.owner-tab.active {
+    background: linear-gradient(135deg, var(--accent-gold), var(--primary-blue));
+    color: var(--text-white);
+    box-shadow: var(--shadow);
+}
+
+.owner-tab:hover:not(.active) {
+    background: rgba(59, 130, 246, 0.1);
+    color: var(--text-white);
+}
+
+.tab-content {
+    display: none;
+}
+
+.tab-content.active {
+    display: block;
+    animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
 }
 
 /* SMS Section */
@@ -349,7 +394,7 @@ nav a:hover {
     font-size: 0.9rem;
 }
 
-/* Product Management */
+/* Product Management - UPDATED LANDSCAPE LAYOUT */
 .product-management {
     background: linear-gradient(135deg, var(--dark-card), rgba(30, 58, 138, 0.2));
     padding: 2rem;
@@ -457,7 +502,7 @@ textarea.form-control {
     object-fit: contain;
 }
 
-/* Edit Products Section */
+/* Edit Products Section - UPDATED COMPACT LANDSCAPE LAYOUT */
 .edit-products-section {
     margin-top: 2rem;
 }
@@ -476,79 +521,256 @@ textarea.form-control {
 }
 
 #product-forms {
-    display: flex;
-    flex-direction: column;
-    gap: 1.5rem;
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1rem;
 }
 
+/* UPDATED COMPACT LANDSCAPE PRODUCT EDIT FORM */
 .product-edit-form {
     background: rgba(15, 23, 42, 0.5);
-    padding: 1.5rem;
+    padding: 1rem;
     border-radius: var(--radius);
     box-shadow: var(--shadow);
     border: 1px solid rgba(59, 130, 246, 0.3);
     transition: var(--transition);
+    display: grid;
+    grid-template-columns: 100px 1fr;
+    gap: 1rem;
+    align-items: start;
+    min-height: 120px;
 }
 
 .product-edit-form:hover {
     border-color: var(--accent-gold);
     box-shadow: var(--shadow-lg);
+    transform: translateY(-2px);
 }
 
-.product-form-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 1rem;
-    padding-bottom: 1rem;
-    border-bottom: 1px solid var(--border-light);
-}
-
-.product-form-title {
-    font-weight: 600;
-    color: var(--text-white);
-}
-
-.product-form-content {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 1rem;
-}
-
+/* Product Image Section - Left Side */
 .product-image-section {
-    grid-column: 1 / -1;
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 1.5rem;
-    margin-top: 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
 }
 
 .current-image {
     text-align: center;
 }
 
-.current-image h5 {
-    margin-bottom: 1rem;
-    color: var(--text-white);
-    font-size: 1rem;
-}
-
 .current-image img {
-    max-width: 100%;
-    max-height: 200px;
-    border-radius: 8px;
-    border: 2px solid var(--border-light);
-    padding: 0.5rem;
+    width: 80px;
+    height: 60px;
+    border-radius: 6px;
+    border: 1px solid var(--border-light);
+    padding: 0.2rem;
     background: rgba(15, 23, 42, 0.8);
+    object-fit: cover;
 }
 
-.product-actions {
-    grid-column: 1 / -1;
+.image-url-input {
     display: flex;
-    justify-content: flex-end;
-    margin-top: 1.5rem;
-    padding-top: 1.5rem;
-    border-top: 1px solid var(--border-light);
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.image-url-input label {
+    font-size: 0.7rem;
+    color: #94a3b8;
+    font-weight: 600;
+}
+
+.image-url-input .form-control {
+    padding: 0.3rem 0.4rem;
+    font-size: 0.75rem;
+    height: 28px;
+}
+
+.image-preview-container {
+    margin-top: 0.25rem;
+}
+
+.image-preview {
+    height: 50px;
+    font-size: 0.65rem;
+}
+
+.image-preview img {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+}
+
+/* Product Details Section - Right Side */
+.product-details-section {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+/* First Row: Name, Tamil Name, Price */
+.product-main-row {
+    display: grid;
+    grid-template-columns: 2fr 2fr 1fr;
+    gap: 0.5rem;
+    align-items: start;
+}
+
+.product-name-input,
+.product-tamil-input {
+    margin-bottom: 0;
+}
+
+.product-price-input {
+    min-width: 80px;
+}
+
+/* Second Row: Description */
+.product-description-row {
+    grid-column: 1 / -1;
+}
+
+.product-description-input {
+    margin-bottom: 0;
+}
+
+/* Third Row: Category, Badge, Delete Button */
+.product-actions-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr auto;
+    gap: 0.5rem;
+    align-items: center;
+}
+
+.product-category-select,
+.product-badge-select {
+    margin-bottom: 0;
+}
+
+/* Compact Form Elements */
+.compact-form-group {
+    margin-bottom: 0.25rem;
+}
+
+.compact-form-group label {
+    display: block;
+    margin-bottom: 0.2rem;
+    color: var(--text-white);
+    font-weight: 600;
+    font-size: 0.7rem;
+}
+
+.compact-form-control {
+    width: 100%;
+    padding: 0.4rem 0.5rem;
+    border: 1px solid var(--border-light);
+    border-radius: 5px;
+    font-size: 0.75rem;
+    transition: var(--transition);
+    background: rgba(15, 23, 42, 0.8);
+    color: var(--text-white);
+    height: 28px;
+}
+
+.compact-form-control:focus {
+    outline: none;
+    border-color: var(--accent-gold);
+    box-shadow: 0 0 0 2px rgba(245, 158, 11, 0.1);
+}
+
+.compact-textarea {
+    height: 40px;
+    resize: vertical;
+    min-height: 40px;
+    font-size: 0.75rem;
+    padding: 0.4rem 0.5rem;
+}
+
+/* Compact Buttons */
+.compact-btn {
+    padding: 0.4rem 0.6rem;
+    font-size: 0.7rem;
+    min-width: 70px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.25rem;
+}
+
+/* Product Header Info */
+.product-header-info {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.5rem;
+    padding-bottom: 0.4rem;
+    border-bottom: 1px solid var(--border-light);
+}
+
+.product-title {
+    font-weight: 600;
+    color: var(--text-white);
+    font-size: 0.85rem;
+}
+
+.product-meta {
+    display: flex;
+    gap: 0.75rem;
+    font-size: 0.7rem;
+    color: #94a3b8;
+}
+
+.product-category-badge {
+    background: rgba(59, 130, 246, 0.2);
+    color: var(--primary-light);
+    padding: 0.15rem 0.4rem;
+    border-radius: 3px;
+    font-weight: 600;
+    font-size: 0.65rem;
+}
+
+.product-price-badge {
+    background: rgba(245, 158, 11, 0.2);
+    color: var(--accent-gold);
+    padding: 0.15rem 0.4rem;
+    border-radius: 3px;
+    font-weight: 600;
+    font-size: 0.65rem;
+}
+
+/* Responsive adjustments for the new layout */
+@media (max-width: 768px) {
+    .product-edit-form {
+        grid-template-columns: 1fr;
+        gap: 0.75rem;
+    }
+    
+    .product-image-section {
+        grid-column: 1;
+        flex-direction: row;
+        gap: 1rem;
+        align-items: center;
+    }
+    
+    .current-image img {
+        width: 60px;
+        height: 45px;
+    }
+    
+    .product-main-row {
+        grid-template-columns: 1fr;
+        gap: 0.4rem;
+    }
+    
+    .product-actions-row {
+        grid-template-columns: 1fr;
+        gap: 0.4rem;
+    }
+    
+    .compact-btn {
+        width: 100%;
+    }
 }
 
 /* Order History */
@@ -931,122 +1153,28 @@ textarea.form-control {
     background: linear-gradient(135deg, var(--success), #059669);
 }
 
-/* Responsive Design */
-@media (max-width: 1024px) {
-    .owner-dashboard {
-        grid-template-columns: 1fr;
-    }
+/* Status badges for orders */
+.status-completed {
+    color: var(--success);
+    font-weight: 600;
 }
 
-@media (max-width: 768px) {
-    .header-content {
-        flex-direction: column;
-        padding: 1rem 0;
-        gap: 1rem;
-    }
-    
-    nav ul {
-        gap: 1rem;
-    }
-    
-    .owner-background {
-        padding: 1.5rem;
-        margin: 1rem 0;
-    }
-    
-    .stats-overview {
-        grid-template-columns: repeat(2, 1fr);
-    }
-    
-    .form-grid {
-        grid-template-columns: 1fr;
-    }
-    
-    .product-form-content {
-        grid-template-columns: 1fr;
-    }
-    
-    .product-image-section {
-        grid-template-columns: 1fr;
-    }
-    
-    .sms-controls {
-        flex-direction: column;
-    }
-    
-    .owner-actions {
-        flex-direction: column;
-    }
-    
-    .order-filters {
-        justify-content: center;
-    }
-    
-    .order-header {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 0.5rem;
-    }
-    
-    .notification-header {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 0.5rem;
-    }
-    
-    .sms-actions {
-        flex-direction: column;
-    }
+.status-pending {
+    color: var(--warning);
+    font-weight: 600;
 }
 
-@media (max-width: 480px) {
-    .container {
-        padding: 0 1rem;
-    }
-    
-    .stats-overview {
-        grid-template-columns: 1fr;
-    }
-    
-    .owner-header h2 {
-        font-size: 2rem;
-    }
-    
-    .password-form {
-        padding: 1rem;
-    }
-    
-    .stat-card {
-        flex-direction: column;
-        text-align: center;
-    }
+.status-cancelled {
+    color: var(--error);
+    font-weight: 600;
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 /* ===== RESPONSIVE DESIGN ===== */
 
 /* Large devices (desktops, less than 1200px) */
 @media (max-width: 1199.98px) {
     .container {
-        max-width: 960px;
-    }
-    
-    .owner-dashboard {
-        gap: 1.5rem;
+        max-width: 1140px;
     }
     
     .form-grid {
@@ -1057,7 +1185,7 @@ textarea.form-control {
 /* Medium devices (tablets, less than 992px) */
 @media (max-width: 991.98px) {
     .container {
-        max-width: 720px;
+        max-width: 960px;
     }
     
     .header-content {
@@ -1079,25 +1207,12 @@ textarea.form-control {
         grid-template-columns: repeat(2, 1fr);
     }
     
-    .owner-dashboard {
-        grid-template-columns: 1fr;
-        gap: 2rem;
-    }
-    
     .owner-background {
         padding: 1.5rem;
         margin: 1.5rem 0;
     }
     
     .form-grid {
-        grid-template-columns: 1fr;
-    }
-    
-    .product-form-content {
-        grid-template-columns: 1fr;
-    }
-    
-    .product-image-section {
         grid-template-columns: 1fr;
     }
     
@@ -1134,7 +1249,7 @@ textarea.form-control {
 /* Small devices (landscape phones, less than 768px) */
 @media (max-width: 767.98px) {
     .container {
-        max-width: 540px;
+        max-width: 720px;
         padding: 0 15px;
     }
     
@@ -1182,7 +1297,23 @@ textarea.form-control {
     }
     
     .product-edit-form {
-        padding: 1.25rem;
+        padding: 1rem;
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+    
+    .product-image-section {
+        grid-column: 1;
+    }
+    
+    .product-details-section {
+        grid-column: 1;
+    }
+    
+    .product-actions {
+        grid-column: 1;
+        flex-direction: row;
+        justify-content: flex-end;
     }
     
     .order-item {
@@ -1299,12 +1430,6 @@ textarea.form-control {
         margin-bottom: 1.25rem;
     }
     
-    .product-form-header {
-        flex-direction: column;
-        gap: 0.5rem;
-        align-items: flex-start;
-    }
-    
     .order-filters {
         gap: 0.5rem;
     }
@@ -1398,7 +1523,7 @@ textarea.form-control {
     }
     
     .product-edit-form {
-        padding: 1rem;
+        padding: 0.75rem;
     }
     
     .order-item {
@@ -1420,10 +1545,6 @@ textarea.form-control {
     
     .image-preview {
         height: 120px;
-    }
-    
-    .current-image img {
-        max-height: 150px;
     }
 }
 
@@ -1503,16 +1624,6 @@ textarea.form-control {
     textarea.form-control {
         min-height: 60px;
     }
-    
-    .product-actions {
-        flex-direction: column;
-        gap: 0.5rem;
-    }
-    
-    .product-actions .btn {
-        width: 100%;
-        justify-content: center;
-    }
 }
 
 /* Table specific responsive improvements */
@@ -1576,3 +1687,5 @@ textarea.form-control {
         scroll-behavior: smooth;
     }
 }
+
+
