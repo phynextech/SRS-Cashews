@@ -183,7 +183,44 @@ function loadLocalProducts() {
             category: "cashews",
             badge: "Premium"
         },
-        
+        w180: { 
+            id: "w180",
+            name: "W-180 Premium Cashews", 
+            nameTamil: "W-180 முந்திரி",
+            price: 160,
+            description: "The largest and most expensive grade, often called the 'King of Cashews'.",
+            image: "https://palmtreeshopping.com/cdn/shop/files/CASHEW_W180_THUMBNAIL.png?v=1735376508",
+            category: "cashews",
+            badge: "Premium"
+        },
+        w210: { 
+            id: "w210",
+            name: "W-210 Cashews", 
+            nameTamil: "W-210 முந்திரி",
+            price: 150,
+            description: "'Jumbo' size, slightly smaller than W-180 but still large and premium.",
+            image: "https://5.imimg.com/data5/NV/LY/OR/SELLER-26605812/w210-cashew-nut-1000x1000.jpg",
+            category: "cashews",
+            badge: "Popular"
+        },
+        w240: { 
+            id: "w240",
+            name: "W-240 Cashews", 
+            nameTamil: "W-240 முந்திரி",
+            price: 140,
+            description: "A mid-range, standard-sized cashew that offers a balance between size and price.",
+            image: "https://5.imimg.com/data5/ANDROID/Default/2024/8/446625112/EK/XD/AB/130288969/product-jpeg-500x500.jpg",
+            category: "cashews"
+        },
+        w320: { 
+            id: "w320",
+            name: "W-320 Cashews", 
+            nameTamil: "W-320 முந்திரி",
+            price: 130,
+            description: "The most popular and widely available grade, larger than W-400 but more affordable than higher grades.",
+            image: "https://5.imimg.com/data5/SELLER/Default/2020/8/NC/FS/FY/30563227/cashew-w320-500x500.jpg",
+            category: "cashews"
+        },
         
         // Other Nuts
         badam: { 
@@ -405,7 +442,7 @@ function updateCarousel() {
     });
 }
 
-// PRODUCT FUNCTIONS
+// PRODUCT FUNCTIONS - UPDATED WITH INTEGRATED ADD TO CART
 function renderProducts(filter = 'all', searchTerm = '') {
     productsGrid.innerHTML = '';
     
@@ -430,6 +467,7 @@ function renderProducts(filter = 'all', searchTerm = '') {
     
     for (const productId in filteredProducts) {
         const product = filteredProducts[productId];
+        const cartQuantity = cart[productId] ? cart[productId].quantity : 0;
         
         const productCard = document.createElement('div');
         productCard.className = 'product-card';
@@ -443,16 +481,22 @@ function renderProducts(filter = 'all', searchTerm = '') {
                 ${product.nameTamil ? `<div class="product-name-tamil">${product.nameTamil}</div>` : ''}
                 <p class="product-description">${product.description}</p>
                 <div class="product-price">₹${product.price} / 50g</div>
-                <div class="quantity-selector">
-                    <button class="quantity-btn minus" data-product="${productId}">-</button>
-                    <input type="text" class="quantity-input" data-product="${productId}" value="0" readonly>
-                    <button class="quantity-btn plus" data-product="${productId}">+</button>
-                </div>
+                
                 <div class="quantity-label">Quantity (50g increments)</div>
-                <button class="add-to-cart" data-product="${productId}">
-                    <i class="fas fa-shopping-cart"></i>
-                    Add to Cart
-                </button>
+                
+                <div class="quantity-selector">
+                    <button class="quantity-btn minus" data-product="${productId}" ${cartQuantity === 0 ? 'disabled' : ''}>
+                        <i class="fas fa-minus"></i>
+                    </button>
+                    <input type="text" class="quantity-input" data-product="${productId}" value="${cartQuantity}" readonly>
+                    <button class="quantity-btn plus" data-product="${productId}">
+                        <i class="fas fa-plus"></i>
+                    </button>
+                    <button class="add-to-cart-btn" data-product="${productId}" ${cartQuantity === 0 ? 'disabled' : ''}>
+                        <i class="fas fa-shopping-cart"></i>
+                        ${cartQuantity > 0 ? 'Update Cart' : 'Add to Cart'}
+                    </button>
+                </div>
             </div>
         `;
         
@@ -473,18 +517,26 @@ function renderProducts(filter = 'all', searchTerm = '') {
 }
 
 function setupProductEventListeners() {
-    // Quantity buttons
-    const quantityBtns = document.querySelectorAll('.quantity-btn');
-    quantityBtns.forEach(btn => {
+    // Quantity minus buttons
+    const minusBtns = document.querySelectorAll('.quantity-btn.minus');
+    minusBtns.forEach(btn => {
         btn.addEventListener('click', () => {
             const productId = btn.getAttribute('data-product');
-            const isPlus = btn.classList.contains('plus');
-            updateQuantity(productId, isPlus);
+            updateQuantity(productId, false);
+        });
+    });
+    
+    // Quantity plus buttons
+    const plusBtns = document.querySelectorAll('.quantity-btn.plus');
+    plusBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+            const productId = btn.getAttribute('data-product');
+            updateQuantity(productId, true);
         });
     });
     
     // Add to cart buttons
-    const addToCartBtns = document.querySelectorAll('.add-to-cart');
+    const addToCartBtns = document.querySelectorAll('.add-to-cart-btn');
     addToCartBtns.forEach(btn => {
         btn.addEventListener('click', () => {
             const productId = btn.getAttribute('data-product');
@@ -493,10 +545,13 @@ function setupProductEventListeners() {
     });
 }
 
-// CART FUNCTIONS
+// UPDATED QUANTITY AND CART FUNCTIONS
 function updateQuantity(productId, isPlus) {
     const quantityInput = document.querySelector(`.quantity-input[data-product="${productId}"]`);
-    let quantity = parseInt(quantityInput.value);
+    const minusBtn = document.querySelector(`.quantity-btn.minus[data-product="${productId}"]`);
+    const addToCartBtn = document.querySelector(`.add-to-cart-btn[data-product="${productId}"]`);
+    
+    let quantity = parseInt(quantityInput.value) || 0;
     
     if (isPlus) {
         quantity++;
@@ -505,10 +560,32 @@ function updateQuantity(productId, isPlus) {
     }
     
     quantityInput.value = quantity;
+    
+    // Update button states
+    if (quantity === 0) {
+        minusBtn.disabled = true;
+        addToCartBtn.disabled = true;
+        addToCartBtn.innerHTML = '<i class="fas fa-shopping-cart"></i> Add to Cart';
+        addToCartBtn.classList.remove('added');
+    } else {
+        minusBtn.disabled = false;
+        addToCartBtn.disabled = false;
+        
+        // Check if this product is already in cart
+        if (cart[productId] && cart[productId].quantity === quantity) {
+            addToCartBtn.innerHTML = '<i class="fas fa-check"></i> In Cart';
+            addToCartBtn.classList.add('added');
+        } else {
+            addToCartBtn.innerHTML = cart[productId] ? '<i class="fas fa-shopping-cart"></i> Update Cart' : '<i class="fas fa-shopping-cart"></i> Add to Cart';
+            addToCartBtn.classList.remove('added');
+        }
+    }
 }
 
 function addToCart(productId) {
     const quantityInput = document.querySelector(`.quantity-input[data-product="${productId}"]`);
+    const addToCartBtn = document.querySelector(`.add-to-cart-btn[data-product="${productId}"]`);
+    
     const quantity = parseInt(quantityInput.value);
     
     if (quantity <= 0) {
@@ -520,8 +597,8 @@ function addToCart(productId) {
     const totalPrice = product.price * quantity;
     
     if (cart[productId]) {
-        cart[productId].quantity += quantity;
-        cart[productId].total += totalPrice;
+        cart[productId].quantity = quantity;
+        cart[productId].total = totalPrice;
     } else {
         cart[productId] = {
             name: product.name,
@@ -533,12 +610,80 @@ function addToCart(productId) {
         };
     }
     
-    updateCart();
-    showNotification(`${quantity} × 50g of ${product.name} added to cart!`);
+    // Update the add to cart button to show "In Cart"
+    addToCartBtn.innerHTML = '<i class="fas fa-check"></i> In Cart';
+    addToCartBtn.classList.add('added');
     
-    quantityInput.value = 0;
+    updateCart();
+    showNotification(`${quantity} × 50g of ${product.name} ${cart[productId] ? 'updated in' : 'added to'} cart!`);
+    
+    updateCartCount();
 }
 
+function updateCartQuantity(productId, isPlus) {
+    if (isPlus) {
+        cart[productId].quantity += 1;
+        cart[productId].total += cart[productId].price;
+    } else if (cart[productId].quantity > 1) {
+        cart[productId].quantity -= 1;
+        cart[productId].total -= cart[productId].price;
+    } else {
+        removeFromCart(productId);
+        return;
+    }
+    
+    // Update the product card quantity if it exists
+    const quantityInput = document.querySelector(`.quantity-input[data-product="${productId}"]`);
+    const addToCartBtn = document.querySelector(`.add-to-cart-btn[data-product="${productId}"]`);
+    const minusBtn = document.querySelector(`.quantity-btn.minus[data-product="${productId}"]`);
+    
+    if (quantityInput) {
+        quantityInput.value = cart[productId].quantity;
+        
+        // Update button states
+        if (cart[productId].quantity === 0) {
+            if (minusBtn) minusBtn.disabled = true;
+            if (addToCartBtn) {
+                addToCartBtn.disabled = true;
+                addToCartBtn.innerHTML = '<i class="fas fa-shopping-cart"></i> Add to Cart';
+                addToCartBtn.classList.remove('added');
+            }
+        } else {
+            if (minusBtn) minusBtn.disabled = false;
+            if (addToCartBtn) {
+                addToCartBtn.disabled = false;
+                addToCartBtn.innerHTML = '<i class="fas fa-check"></i> In Cart';
+                addToCartBtn.classList.add('added');
+            }
+        }
+    }
+    
+    updateCart();
+}
+
+function removeFromCart(productId) {
+    // Update the product card if it exists
+    const quantityInput = document.querySelector(`.quantity-input[data-product="${productId}"]`);
+    const addToCartBtn = document.querySelector(`.add-to-cart-btn[data-product="${productId}"]`);
+    const minusBtn = document.querySelector(`.quantity-btn.minus[data-product="${productId}"]`);
+    
+    if (quantityInput) {
+        quantityInput.value = 0;
+        
+        if (minusBtn) minusBtn.disabled = true;
+        if (addToCartBtn) {
+            addToCartBtn.disabled = true;
+            addToCartBtn.innerHTML = '<i class="fas fa-shopping-cart"></i> Add to Cart';
+            addToCartBtn.classList.remove('added');
+        }
+    }
+    
+    delete cart[productId];
+    updateCart();
+    showNotification('Item removed from cart.', true);
+}
+
+// Update the updateCart function to ensure consistency
 function updateCart() {
     cartItems.innerHTML = '';
     
@@ -597,41 +742,7 @@ function updateCart() {
     updateCartCount();
 }
 
-function updateCartQuantity(productId, isPlus) {
-    if (isPlus) {
-        cart[productId].quantity += 1;
-        cart[productId].total += cart[productId].price;
-    } else if (cart[productId].quantity > 1) {
-        cart[productId].quantity -= 1;
-        cart[productId].total -= cart[productId].price;
-    } else {
-        removeFromCart(productId);
-        return;
-    }
-    
-    updateCart();
-}
-
-function removeFromCart(productId) {
-    delete cart[productId];
-    updateCart();
-    showNotification('Item removed from cart.', true);
-}
-
-function updateCartTotal() {
-    let subtotal = 0;
-    
-    for (const productId in cart) {
-        subtotal += cart[productId].total;
-    }
-    
-    const shipping = 50;
-    const total = subtotal + shipping;
-    
-    subtotalElement.textContent = `₹${subtotal.toFixed(2)}`;
-    totalElement.textContent = `₹${total.toFixed(2)}`;
-}
-
+// Update cart count function
 function updateCartCount() {
     let totalItems = 0;
     
