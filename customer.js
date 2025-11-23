@@ -1,3 +1,4 @@
+// customer.js
 // API Functions
 async function apiCall(endpoint, options = {}) {
   try {
@@ -104,59 +105,6 @@ async function init() {
     updateCartCount();
     startCarousel();
     showNotification('Welcome to SRS Cashews! Premium cashews from Panruti, Tamil Nadu', false);
-}
-
-// API Functions
-async function apiCall(endpoint, options = {}) {
-    try {
-        const response = await fetch(`${API_BASE_URL}${endpoint}`, {
-            headers: {
-                'Content-Type': 'application/json',
-                ...options.headers
-            },
-            ...options
-        });
-        
-        if (!response.ok) {
-            throw new Error(`API error: ${response.status}`);
-        }
-        
-        return await response.json();
-    } catch (error) {
-        console.error('API call failed:', error);
-        throw error;
-    }
-}
-
-// Load products from MongoDB
-async function loadProducts() {
-    try {
-        const productsArray = await apiCall('/products');
-        
-        // Convert array to object with id as key
-        products = {};
-        productsArray.forEach(product => {
-            products[product.id] = product;
-        });
-        
-        renderProducts();
-    } catch (error) {
-        console.error('Failed to load products from API, using fallback:', error);
-        loadLocalProducts();
-    }
-}
-
-// Save order to MongoDB
-async function saveOrderToDB(orderData) {
-    try {
-        return await apiCall('/orders', {
-            method: 'POST',
-            body: JSON.stringify(orderData)
-        });
-    } catch (error) {
-        console.error('Error saving order:', error);
-        throw error;
-    }
 }
 
 // Fallback to local products with expanded selection and Tamil names
@@ -442,7 +390,7 @@ function updateCarousel() {
     });
 }
 
-// PRODUCT FUNCTIONS - UPDATED WITH INTEGRATED ADD TO CART
+// PRODUCT FUNCTIONS - UPDATED WITH INTEGRATED ADD TO CART AND BILINGUAL NAMES
 function renderProducts(filter = 'all', searchTerm = '') {
     productsGrid.innerHTML = '';
     
@@ -477,8 +425,10 @@ function renderProducts(filter = 'all', searchTerm = '') {
                 ${product.badge ? `<div class="product-badge">${product.badge}</div>` : ''}
             </div>
             <div class="product-info">
-                <h3 class="product-name">${product.name}</h3>
-                ${product.nameTamil ? `<div class="product-name-tamil">${product.nameTamil}</div>` : ''}
+                <div class="product-name-bilingual">
+                    <div class="product-name-english">${product.name}</div>
+                    <div class="product-name-tamil">${product.nameTamil}</div>
+                </div>
                 <p class="product-description">${product.description}</p>
                 <div class="product-price">₹${product.price} / 50g</div>
                 
@@ -740,6 +690,20 @@ function updateCart() {
     
     updateCartTotal();
     updateCartCount();
+}
+
+function updateCartTotal() {
+    let subtotal = 0;
+    
+    for (const productId in cart) {
+        subtotal += cart[productId].total;
+    }
+    
+    const shipping = 50;
+    const total = subtotal + shipping;
+    
+    subtotalElement.textContent = subtotal.toFixed(2);
+    totalElement.textContent = total.toFixed(2);
 }
 
 // Update cart count function
@@ -1230,8 +1194,6 @@ window.updateNewProductPreview = function() {
 };
 
 window.copyUPI = copyUPI;
-
-
 
 // Enhanced responsive functionality
 function setupResponsiveFeatures() {
