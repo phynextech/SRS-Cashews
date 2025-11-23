@@ -1,5 +1,113 @@
-// API Configuration
-const API_BASE_URL = 'http://localhost:5000/api';
+// API Functions
+async function apiCall(endpoint, options = {}) {
+  try {
+    const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+      headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+      },
+      ...options
+    });
+    
+    if (!response.ok) {
+      throw new Error(`API error: ${response.status}`);
+    }
+    
+    return await response.json();
+  } catch (error) {
+    console.error('API call failed:', error);
+    throw error;
+  }
+}
+
+// Load products from MongoDB
+async function loadProducts() {
+  try {
+    const productsArray = await apiCall('/products');
+    
+    // Convert array to object with id as key
+    products = {};
+    productsArray.forEach(product => {
+      products[product.id] = product;
+    });
+    
+    renderOwnerForms();
+    updateStats();
+  } catch (error) {
+    console.error('Failed to load products from API:', error);
+    showNotification('Failed to load products. Using local data.', true);
+    loadLocalProducts();
+  }
+}
+
+// Load orders from MongoDB
+async function loadOrders() {
+  try {
+    orders = await apiCall('/orders');
+    filteredOrders = [...orders];
+    renderOrderHistory();
+    renderOrderNotifications();
+    renderRecentOrders();
+    updateStats();
+  } catch (error) {
+    console.error('Failed to load orders from API:', error);
+    showNotification('Failed to load orders.', true);
+  }
+}
+
+// Save product to MongoDB
+async function saveProductToDB(productId, productData) {
+  try {
+    return await apiCall(`/products/${productId}`, {
+      method: 'PUT',
+      body: JSON.stringify(productData)
+    });
+  } catch (error) {
+    console.error('Error saving product:', error);
+    throw error;
+  }
+}
+
+// Add new product to MongoDB
+async function addProductToDB(productData) {
+  try {
+    return await apiCall('/products', {
+      method: 'POST',
+      body: JSON.stringify(productData)
+    });
+  } catch (error) {
+    console.error('Error adding product:', error);
+    throw error;
+  }
+}
+
+// Delete product from MongoDB
+async function deleteProduct(productId) {
+  try {
+    await apiCall(`/products/${productId}`, {
+      method: 'DELETE'
+    });
+    return true;
+  } catch (error) {
+    console.error('Error deleting product:', error);
+    throw error;
+  }
+}
+
+// Update order status
+async function updateOrderStatus(orderId, status) {
+  try {
+    await apiCall(`/orders/${orderId}`, {
+      method: 'PATCH',
+      body: JSON.stringify({ status })
+    });
+    return true;
+  } catch (error) {
+    console.error('Error updating order:', error);
+    throw error;
+  }
+}
+
 
 // Global data
 let products = {};
@@ -262,7 +370,7 @@ function loadLocalProducts() {
             nameTamil: "பாதாம் முந்திரி",
             price: 140,
             description: "Premium Batham cashews with creamy texture and buttery flavor from Panruti.",
-            image: "https://images.unsplash.com/photo-1626074353765-517f5517d9d4?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80",
+            image: "https://m.media-amazon.com/images/I/71o-btxbBiL._AC_UF894,1000_QL80_.jpg",
             category: "cashews",
             badge: "Panruti Special"
         },
@@ -272,48 +380,11 @@ function loadLocalProducts() {
             nameTamil: "காஜு முந்திரி",
             price: 130,
             description: "Extra large whole cashews with creamy texture and buttery flavor from Panruti farms.",
-            image: "https://images.unsplash.com/photo-1626074353765-517f5517d9d4?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80",
+            image: "https://rukminim2.flixcart.com/image/480/480/ks3jjbk0/nut-dry-fruit/4/s/c/1-premium-whole-cashew-nuts-w210-1-kg-1000-gm-big-size-jumbo-original-imag5qq8dfvfvgcj.jpeg?q=90",
             category: "cashews",
             badge: "Premium"
         },
-        w180: { 
-            id: "w180",
-            name: "W-180 Premium Cashews", 
-            nameTamil: "W-180 முந்திரி",
-            price: 160,
-            description: "Large W-180 grade cashews, the finest quality from Panruti.",
-            image: "https://images.unsplash.com/photo-1626074353765-517f5517d9d4?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80",
-            category: "cashews",
-            badge: "Premium"
-        },
-        w210: { 
-            id: "w210",
-            name: "W-210 Cashews", 
-            nameTamil: "W-210 முந்திரி",
-            price: 150,
-            description: "Premium W-210 grade cashews from Panruti farms.",
-            image: "https://images.unsplash.com/photo-1626074353765-517f5517d9d4?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80",
-            category: "cashews",
-            badge: "Popular"
-        },
-        w240: { 
-            id: "w240",
-            name: "W-240 Cashews", 
-            nameTamil: "W-240 முந்திரி",
-            price: 140,
-            description: "Quality W-240 grade cashews, perfect for daily consumption.",
-            image: "https://images.unsplash.com/photo-1626074353765-517f5517d9d4?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80",
-            category: "cashews"
-        },
-        w320: { 
-            id: "w320",
-            name: "W-320 Cashews", 
-            nameTamil: "W-320 முந்திரி",
-            price: 130,
-            description: "Economical W-320 grade cashews from Panruti.",
-            image: "https://images.unsplash.com/photo-1626074353765-517f5517d9d4?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80",
-            category: "cashews"
-        },
+        
         
         // Other Nuts
         badam: { 
@@ -322,7 +393,7 @@ function loadLocalProducts() {
             nameTamil: "பாதாம்",
             price: 120,
             description: "Large, crunchy California almonds with rich flavor and perfect texture.",
-            image: "https://images.unsplash.com/photo-1615485500606-f3d3f2f7fb7f?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80",
+            image: "https://cdn.britannica.com/04/194904-050-1B92812A/Raw-Food-Almond-food-Nut-Snack.jpg",
             category: "nuts",
             badge: "Premium"
         },
@@ -332,7 +403,7 @@ function loadLocalProducts() {
             nameTamil: "அக்ரோட்",
             price: 110,
             description: "Fresh walnut halves with rich, earthy flavor and crisp texture.",
-            image: "https://images.unsplash.com/photo-1574323347407-f5e1ad6d020b?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80",
+            image: "https://images.squarespace-cdn.com/content/v1/56968a5740667a086de661b9/1452716746154-37ZAQOIRP2SGG74534IX/WalnutHalves2.jpg?format=1500w",
             category: "nuts"
         },
         pista: { 
@@ -341,7 +412,7 @@ function loadLocalProducts() {
             nameTamil: "பிஸ்தா",
             price: 160,
             description: "Premium Iranian pistachios, naturally opened and lightly salted.",
-            image: "https://images.unsplash.com/photo-1615485500606-f3d3f2f7fb7f?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80",
+            image: "https://iran-pistachio.com/wp-content/uploads/2018/11/iran-pistachio-slider-2-small.jpg",
             category: "nuts",
             badge: "Premium"
         },
@@ -351,7 +422,7 @@ function loadLocalProducts() {
             nameTamil: "மகானா",
             price: 90,
             description: "Lightly roasted fox nuts, perfect for healthy snacking.",
-            image: "https://images.unsplash.com/photo-1574323347407-f5e1ad6d020b?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80",
+            image: "https://www.mydiversekitchen.com/wp-content/uploads/2015/01/image.1024x1024.jpg",
             category: "nuts"
         },
         kishmish: { 
@@ -360,7 +431,7 @@ function loadLocalProducts() {
             nameTamil: "கிஸ்மிஸ்",
             price: 60,
             description: "Sweet black raisins, perfect for cooking and snacking.",
-            image: "https://images.unsplash.com/photo-1597872200969-2b65d56bd112?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80",
+            image: "https://nuttyyogi.com/cdn/shop/products/blackraisins.png?v=1680767584",
             category: "dryfruits"
         },
         
@@ -371,7 +442,7 @@ function loadLocalProducts() {
             nameTamil: "பேரீச்சம் பழம்",
             price: 80,
             description: "Premium Medjool dates, naturally sweet and rich in fiber.",
-            image: "https://images.unsplash.com/photo-1597872200969-2b65d56bd112?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80",
+            image: "https://cdn.shopify.com/s/files/1/0437/8953/files/Medjool_Dates_15_2048x2048.jpg?v=1745516427",
             category: "dryfruits",
             badge: "Healthy"
         },
@@ -381,7 +452,7 @@ function loadLocalProducts() {
             nameTamil: "கரு பேரீச்சம் பழம்",
             price: 95,
             description: "Rich black dates with deep flavor and nutritional benefits.",
-            image: "https://images.unsplash.com/photo-1597872200969-2b65d56bd112?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80",
+            image: "https://5.imimg.com/data5/SELLER/Default/2022/4/QL/VY/ON/15059881/black-dates.jpg",
             category: "dryfruits"
         },
         anjeer: { 
@@ -390,7 +461,7 @@ function loadLocalProducts() {
             nameTamil: "அத்தி பழம்",
             price: 110,
             description: "Natural dried figs, rich in fiber and essential nutrients.",
-            image: "https://images.unsplash.com/photo-1597872200969-2b65d56bd112?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80",
+            image: "https://images-cdn.ubuy.ae/647de208711e2c6fa754c6f0-premium-afghani-anjeer-dried-figs.jpg",
             category: "dryfruits"
         },
         apricot: { 
@@ -399,16 +470,16 @@ function loadLocalProducts() {
             nameTamil: "சர்க்கரை பாதாமி",
             price: 85,
             description: "Sun-dried apricots with natural sweetness and chewy texture.",
-            image: "https://images.unsplash.com/photo-1597872200969-2b65d56bd112?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80",
+            image: "https://rukminim2.flixcart.com/image/480/640/xif0q/nut-dry-fruit/v/o/r/200-premium-quality-dried-apricot-i-dry-fruits-apricots-i-pack-original-imahff8gtyth4fe3.jpeg?q=90",
             category: "dryfruits"
         },
         prune: { 
             id: "prune",
             name: "Dried Prunes", 
-            nameTamil: "உலர்ந்த ப்ளம்",
+            nameTamil: "உலர்ந்த கொடிமுந்திரி",
             price: 75,
             description: "Natural dried prunes, great for digestive health.",
-            image: "https://images.unsplash.com/photo-1597872200969-2b65d56bd112?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80",
+            image: "https://www.forksoverknives.com/uploads/2024/09/dried-plums-prunes.jpg?auto=webp",
             category: "dryfruits"
         },
         
@@ -419,7 +490,7 @@ function loadLocalProducts() {
             nameTamil: "பூசணி விதைகள்",
             price: 70,
             description: "Roasted pumpkin seeds, rich in zinc and magnesium.",
-            image: "https://images.unsplash.com/photo-1623650077315-9df4c0a7d3b6?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80",
+            image: "https://rukminim2.flixcart.com/image/480/640/xif0q/nut-dry-fruit/v/s/w/1-pumpkeen-250g-flax-seed-250g-sunflower-250g-chai-seed-250g-4-original-imaguuvh3dsu3tqw.jpeg?q=90",
             category: "seeds",
             badge: "Popular"
         },
@@ -429,7 +500,7 @@ function loadLocalProducts() {
             nameTamil: "சூரியகாந்தி விதைகள்",
             price: 55,
             description: "Raw sunflower seeds, packed with vitamin E and healthy fats.",
-            image: "https://images.unsplash.com/photo-1623650077315-9df4c0a7d3b6?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80",
+            image: "https://m.media-amazon.com/images/I/61EuHk70+oL._AC_UF894,1000_QL80_.jpg",
             category: "seeds"
         },
         flaxseeds: { 
@@ -438,7 +509,7 @@ function loadLocalProducts() {
             nameTamil: "அளசி விதைகள்",
             price: 65,
             description: "Organic flax seeds, excellent source of omega-3 fatty acids.",
-            image: "https://images.unsplash.com/photo-1623650077315-9df4c0a7d3b6?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80",
+            image: "https://rukminim2.flixcart.com/image/480/640/xif0q/plant-seed/b/j/k/150-ga-alsi-flax-seeds-dd-150g-garg-agri-original-imah889zfhhvjksa.jpeg?q=90",
             category: "seeds"
         },
         chia: { 
@@ -447,19 +518,27 @@ function loadLocalProducts() {
             nameTamil: "சியா விதைகள்",
             price: 90,
             description: "Premium chia seeds, high in fiber and antioxidants.",
-            image: "https://images.unsplash.com/photo-1623650077315-9df4c0a7d3b6?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80",
+            image: "https://media.post.rvohealth.io/wp-content/uploads/sites/3/2021/11/chia_seeds_GettyImages1282395572_Thumb-732x549.jpg",
             category: "seeds"
         },
-        sesame: { 
-            id: "sesame",
-            name: "Sesame Seeds", 
-            nameTamil: "எள்ளு",
+        blacksesame: { 
+            id: "blacksesame",
+            name: "Black Sesame Seeds", 
+            nameTamil: "கருப்பு எள்ளு",
             price: 50,
             description: "Natural sesame seeds, rich in calcium and antioxidants.",
-            image: "https://images.unsplash.com/photo-1623650077315-9df4c0a7d3b6?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80",
+            image: "https://m.media-amazon.com/images/I/61l2fI4cEzL._AC_UF1000,1000_QL80_.jpg",
             category: "seeds"
         },
-        
+        whitesesame: { 
+            id: "whitesesame",
+            name: "White Sesame Seeds", 
+            nameTamil: "வெள்ளை எள்ளு",
+            price: 50,
+            description: "Natural sesame seeds, rich in calcium and antioxidants.",
+            image: "https://rukminim2.flixcart.com/image/480/640/kgqvlow0/edible-seed/t/c/x/500-pouch-raw-shree-whole-original-imafww6ytwqgbcxq.jpeg?q=90",
+            category: "seeds"
+        },
         // Premium Category
         macadamia: { 
             id: "macadamia",
@@ -467,7 +546,7 @@ function loadLocalProducts() {
             nameTamil: "மக்கடாமியா",
             price: 200,
             description: "Rich, buttery Hawaiian macadamia nuts, lightly roasted.",
-            image: "https://images.unsplash.com/photo-1574323347407-f5e1ad6d020b?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80",
+            image: "https://www.asiafarming.com/wp-content/uploads/2023/12/Macadamia-Nuts-Cultivation4-1024x682.jpg",
             category: "premium",
             badge: "Premium"
         },
@@ -477,7 +556,7 @@ function loadLocalProducts() {
             nameTamil: "பிரேசில் கொட்டை",
             price: 180,
             description: "Large Brazil nuts, excellent source of selenium.",
-            image: "https://images.unsplash.com/photo-1574323347407-f5e1ad6d020b?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80",
+            image: "https://hodmedods.co.uk/cdn/shop/files/Brazil_Nuts_bowl_board_3x2_903c992b-0ab4-4196-9e20-c3453d3c7096_2000x.jpg?v=1731778883",
             category: "premium"
         },
         pecans: { 
@@ -486,7 +565,7 @@ function loadLocalProducts() {
             nameTamil: "பிகான் கொட்டை",
             price: 170,
             description: "Sweet and buttery pecan nuts, perfect for baking.",
-            image: "https://images.unsplash.com/photo-1574323347407-f5e1ad6d020b?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80",
+            image: "https://media.post.rvohealth.io/wp-content/uploads/2020/08/pecans-732x549-thumbnail.jpg",
             category: "premium"
         }
     };
@@ -1185,10 +1264,3 @@ window.deleteProductHandler = deleteProductHandler;
 window.updateOrderStatusHandler = updateOrderStatusHandler;
 window.sendSMSNotification = sendSMSNotification;
 window.sendPaymentReminder = sendPaymentReminder;
-
-
-
-
-
-
-
