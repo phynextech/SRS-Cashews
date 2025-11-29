@@ -1,113 +1,10 @@
-// API Functions
-async function apiCall(endpoint, options = {}) {
-  try {
-    const response = await fetch(`${API_BASE_URL}${endpoint}`, {
-      headers: {
-        'Content-Type': 'application/json',
-        ...options.headers
-      },
-      ...options
-    });
-    
-    if (!response.ok) {
-      throw new Error(`API error: ${response.status}`);
-    }
-    
-    return await response.json();
-  } catch (error) {
-    console.error('API call failed:', error);
-    throw error;
-  }
-}
+// owner.js - Complete file with localStorage integration
 
-// Load products from MongoDB
-async function loadProducts() {
-  try {
-    const productsArray = await apiCall('/products');
-    
-    // Convert array to object with id as key
-    products = {};
-    productsArray.forEach(product => {
-      products[product.id] = product;
-    });
-    
-    renderOwnerForms();
-    updateStats();
-  } catch (error) {
-    console.error('Failed to load products from API:', error);
-    showNotification('Failed to load products. Using local data.', true);
-    loadLocalProducts();
-  }
-}
-
-// Load orders from MongoDB
-async function loadOrders() {
-  try {
-    orders = await apiCall('/orders');
-    filteredOrders = [...orders];
-    renderOrderHistory();
-    renderOrderNotifications();
-    renderRecentOrders();
-    updateStats();
-  } catch (error) {
-    console.error('Failed to load orders from API:', error);
-    showNotification('Failed to load orders.', true);
-  }
-}
-
-// Save product to MongoDB
-async function saveProductToDB(productId, productData) {
-  try {
-    return await apiCall(`/products/${productId}`, {
-      method: 'PUT',
-      body: JSON.stringify(productData)
-    });
-  } catch (error) {
-    console.error('Error saving product:', error);
-    throw error;
-  }
-}
-
-// Add new product to MongoDB
-async function addProductToDB(productData) {
-  try {
-    return await apiCall('/products', {
-      method: 'POST',
-      body: JSON.stringify(productData)
-    });
-  } catch (error) {
-    console.error('Error adding product:', error);
-    throw error;
-  }
-}
-
-// Delete product from MongoDB
-async function deleteProduct(productId) {
-  try {
-    await apiCall(`/products/${productId}`, {
-      method: 'DELETE'
-    });
-    return true;
-  } catch (error) {
-    console.error('Error deleting product:', error);
-    throw error;
-  }
-}
-
-// Update order status
-async function updateOrderStatus(orderId, status) {
-  try {
-    await apiCall(`/orders/${orderId}`, {
-      method: 'PATCH',
-      body: JSON.stringify({ status })
-    });
-    return true;
-  } catch (error) {
-    console.error('Error updating order:', error);
-    throw error;
-  }
-}
-
+// Storage Keys
+const STORAGE_KEYS = {
+    PRODUCTS: 'srs_cashews_products',
+    ORDERS: 'srs_cashews_orders'
+};
 
 // Global data
 let products = {};
@@ -159,48 +56,99 @@ const OWNER_PASSWORD = "srs123";
 // Initialize the owner portal
 async function init() {
     setupEventListeners();
-    // Don't load data until user is authenticated
+    // Set up storage listener for real-time order updates from customer page
+    window.addEventListener('storage', handleStorageUpdate);
 }
 
-// API Functions
-async function apiCall(endpoint, options = {}) {
-    try {
-        const response = await fetch(`${API_BASE_URL}${endpoint}`, {
-            headers: {
-                'Content-Type': 'application/json',
-                ...options.headers
-            },
-            ...options
-        });
-        
-        if (!response.ok) {
-            throw new Error(`API error: ${response.status}`);
-        }
-        
-        return await response.json();
-    } catch (error) {
-        console.error('API call failed:', error);
-        throw error;
+// Handle storage updates from customer page
+function handleStorageUpdate(event) {
+    if (event.key === STORAGE_KEYS.ORDERS) {
+        loadOrders();
+        showNotification('New order received!', false, 'success');
+    }
+    if (event.key === STORAGE_KEYS.PRODUCTS) {
+        // This would be for multi-tab sync, but we control products from owner only
     }
 }
 
-// Load products from MongoDB
+// Load products from localStorage
 async function loadProducts() {
     try {
-        const productsArray = await apiCall('/products');
+        const storedProducts = localStorage.getItem(STORAGE_KEYS.PRODUCTS);
         
-        // Convert array to object with id as key
-        products = {};
-        productsArray.forEach(product => {
-            products[product.id] = product;
-        });
+        if (storedProducts) {
+            const productsArray = JSON.parse(storedProducts);
+            
+            // Convert array to object with id as key
+            products = {};
+            productsArray.forEach(product => {
+                products[product.id] = product;
+            });
+            
+            renderOwnerForms();
+            updateStats();
+        } else {
+            // If no products in localStorage, load default products
+            loadLocalProducts();
+            saveProductsToStorage();
+        }
+    } catch (error) {
+        console.error('Failed to load products from storage:', error);
+        loadLocalProducts();
+        saveProductsToStorage();
+    }
+}
+
+// Save products to localStorage
+function saveProductsToStorage() {
+    try {
+        const productsArray = Object.values(products);
+        localStorage.setItem(STORAGE_KEYS.PRODUCTS, JSON.stringify(productsArray));
         
-        renderOwnerForms();
+        // Trigger storage event for customer page
+        window.dispatchEvent(new StorageEvent('storage', {
+            key: STORAGE_KEYS.PRODUCTS,
+            newValue: localStorage.getItem(STORAGE_KEYS.PRODUCTS)
+        }));
+    } catch (error) {
+        console.error('Failed to save products to storage:', error);
+    }
+}
+
+// Load orders from localStorage
+async function loadOrders() {
+    try {
+        const storedOrders = localStorage.getItem(STORAGE_KEYS.ORDERS);
+        
+        if (storedOrders) {
+            orders = JSON.parse(storedOrders);
+        } else {
+            orders = [];
+        }
+        
+        // Always add dummy orders for demonstration if no real orders
+        if (orders.length === 0) {
+            addDummyOrders();
+        }
+        
+        filteredOrders = [...orders];
+        renderOrderHistory();
+        renderOrderNotifications();
+        renderRecentOrders();
         updateStats();
     } catch (error) {
-        console.error('Failed to load products from API:', error);
-        showNotification('Failed to load products. Using local data.', true);
-        loadLocalProducts();
+        console.error('Failed to load orders from storage:', error);
+        orders = [];
+        addDummyOrders();
+    }
+}
+
+// Save orders to localStorage
+function saveOrdersToStorage() {
+    try {
+        localStorage.setItem(STORAGE_KEYS.ORDERS, JSON.stringify(orders));
+    } catch (error) {
+        console.error('Failed to save orders to storage:', error);
     }
 }
 
@@ -208,14 +156,14 @@ async function loadProducts() {
 function addDummyOrders() {
     const dummyOrders = [
         {
-            _id: "dummy_order_1",
+            id: "dummy_order_1",
             customerName: "Rajesh Kumar",
             customerPhone: "+91 9876543210",
             customerAddress: "123 MG Road, Anna Nagar",
             customerPincode: "600040",
             customerPlace: "Chennai",
             paymentMethod: "cod",
-            date: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(), // 2 hours ago
+            date: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
             items: [
                 {
                     name: "Batham Cashew Nuts",
@@ -234,19 +182,19 @@ function addDummyOrders() {
                     productId: "badam"
                 }
             ],
-            total: 450, // 400 + 50 shipping
+            total: 450,
             status: "pending",
             source: "SRS Cashews Website"
         },
         {
-            _id: "dummy_order_2",
+            id: "dummy_order_2",
             customerName: "Priya Sharma",
             customerPhone: "+91 8765432109",
             customerAddress: "45 Gandhi Street, T Nagar",
             customerPincode: "600017",
             customerPlace: "Chennai",
             paymentMethod: "online",
-            date: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString(), // 1 day ago
+            date: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString(),
             items: [
                 {
                     name: "W-180 Premium Cashews",
@@ -255,112 +203,20 @@ function addDummyOrders() {
                     quantity: 3,
                     total: 480,
                     productId: "w180"
-                },
-                {
-                    name: "Iranian Pistachios",
-                    nameTamil: "பிஸ்தா",
-                    price: 160,
-                    quantity: 1,
-                    total: 160,
-                    productId: "pista"
-                },
-                {
-                    name: "Medjool Dates",
-                    nameTamil: "பேரீச்சம் பழம்",
-                    price: 80,
-                    quantity: 2,
-                    total: 160,
-                    productId: "dates"
                 }
             ],
-            total: 850, // 800 + 50 shipping
+            total: 530,
             status: "completed",
-            source: "SRS Cashews Website"
-        },
-        {
-            _id: "dummy_order_3",
-            customerName: "Arun Patel",
-            customerPhone: "+91 7654321098",
-            customerAddress: "78 Nehru Street, Adyar",
-            customerPincode: "600020",
-            customerPlace: "Chennai",
-            paymentMethod: "cod",
-            date: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(), // 3 days ago
-            items: [
-                {
-                    name: "Jumbo Whole Cashews",
-                    nameTamil: "காஜு முந்திரி",
-                    price: 130,
-                    quantity: 4,
-                    total: 520,
-                    productId: "kaju"
-                }
-            ],
-            total: 570, // 520 + 50 shipping
-            status: "pending",
-            source: "SRS Cashews Website"
-        },
-        {
-            _id: "dummy_order_4",
-            customerName: "Deepa Iyer",
-            customerPhone: "+91 6543210987",
-            customerAddress: "22 Velachery Main Road",
-            customerPincode: "600042",
-            customerPlace: "Chennai",
-            paymentMethod: "online",
-            date: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(), // 5 days ago
-            items: [
-                {
-                    name: "W-210 Cashews",
-                    nameTamil: "W-210 முந்திரி",
-                    price: 150,
-                    quantity: 2,
-                    total: 300,
-                    productId: "w210"
-                },
-                {
-                    name: "Roasted Fox Nuts",
-                    nameTamil: "மகானா",
-                    price: 90,
-                    quantity: 3,
-                    total: 270,
-                    productId: "makhana"
-                }
-            ],
-            total: 620, // 570 + 50 shipping
-            status: "cancelled",
             source: "SRS Cashews Website"
         }
     ];
 
     // Add dummy orders to the orders array
     orders = [...dummyOrders, ...orders];
-    filteredOrders = [...orders];
+    saveOrdersToStorage();
 }
 
-// Load orders from MongoDB
-async function loadOrders() {
-    try {
-        // Try to load from API first
-        const apiOrders = await apiCall('/orders');
-        orders = apiOrders;
-    } catch (error) {
-        console.error('Failed to load orders from API, using dummy data:', error);
-        // Use dummy data if API fails
-        orders = [];
-    }
-    
-    // Always add dummy orders for demonstration
-    addDummyOrders();
-    
-    filteredOrders = [...orders];
-    renderOrderHistory();
-    renderOrderNotifications();
-    renderRecentOrders();
-    updateStats();
-}
-
-// Fallback to local products with all products from customer page
+// Fallback to local products
 function loadLocalProducts() {
     products = {
         // Premium Panruti Cashews
@@ -384,7 +240,44 @@ function loadLocalProducts() {
             category: "cashews",
             badge: "Premium"
         },
-        
+        w180: { 
+            id: "w180",
+            name: "W-180 Premium Cashews", 
+            nameTamil: "W-180 முந்திரி",
+            price: 160,
+            description: "The largest and most expensive grade, often called the 'King of Cashews'.",
+            image: "https://palmtreeshopping.com/cdn/shop/files/CASHEW_W180_THUMBNAIL.png?v=1735376508",
+            category: "cashews",
+            badge: "Premium"
+        },
+        w210: { 
+            id: "w210",
+            name: "W-210 Cashews", 
+            nameTamil: "W-210 முந்திரி",
+            price: 150,
+            description: "'Jumbo' size, slightly smaller than W-180 but still large and premium.",
+            image: "https://5.imimg.com/data5/NV/LY/OR/SELLER-26605812/w210-cashew-nut-1000x1000.jpg",
+            category: "cashews",
+            badge: "Popular"
+        },
+        w240: { 
+            id: "w240",
+            name: "W-240 Cashews", 
+            nameTamil: "W-240 முந்திரி",
+            price: 140,
+            description: "A mid-range, standard-sized cashew that offers a balance between size and price.",
+            image: "https://5.imimg.com/data5/ANDROID/Default/2024/8/446625112/EK/XD/AB/130288969/product-jpeg-500x500.jpg",
+            category: "cashews"
+        },
+        w320: { 
+            id: "w320",
+            name: "W-320 Cashews", 
+            nameTamil: "W-320 முந்திரி",
+            price: 130,
+            description: "The most popular and widely available grade, larger than W-400 but more affordable than higher grades.",
+            image: "https://5.imimg.com/data5/SELLER/Default/2020/8/NC/FS/FY/30563227/cashew-w320-500x500.jpg",
+            category: "cashews"
+        },
         
         // Other Nuts
         badam: { 
@@ -571,61 +464,8 @@ function loadLocalProducts() {
     };
     renderOwnerForms();
     updateStats();
+    saveProductsToStorage();
 }
-
-// Save product to MongoDB
-async function saveProductToDB(productId, productData) {
-    try {
-        return await apiCall(`/products/${productId}`, {
-            method: 'PUT',
-            body: JSON.stringify(productData)
-        });
-    } catch (error) {
-        console.error('Error saving product:', error);
-        throw error;
-    }
-}
-
-// Add new product to MongoDB
-async function addProductToDB(productData) {
-    try {
-        return await apiCall('/products', {
-            method: 'POST',
-            body: JSON.stringify(productData)
-        });
-    } catch (error) {
-        console.error('Error adding product:', error);
-        throw error;
-    }
-}
-
-// Delete product from MongoDB
-async function deleteProduct(productId) {
-    try {
-        await apiCall(`/products/${productId}`, {
-            method: 'DELETE'
-        });
-        return true;
-    } catch (error) {
-        console.error('Error deleting product:', error);
-        throw error;
-    }
-}
-
-// Update order status
-async function updateOrderStatus(orderId, status) {
-    try {
-        await apiCall(`/orders/${orderId}`, {
-            method: 'PATCH',
-            body: JSON.stringify({ status })
-        });
-        return true;
-    } catch (error) {
-        console.error('Error updating order:', error);
-        throw error;
-    }
-}
-
 // Tab navigation functionality
 function setupTabNavigation() {
     const tabs = document.querySelectorAll('.owner-tab');
@@ -646,7 +486,7 @@ function setupTabNavigation() {
     });
 }
 
-// OWNER PORTAL FUNCTIONS - UPDATED COMPACT LAYOUT
+// OWNER PORTAL FUNCTIONS
 function renderOwnerForms() {
     productForms.innerHTML = '';
     
@@ -751,6 +591,7 @@ function renderOwnerForms() {
     });
 }
 
+// Save product changes to localStorage
 async function saveProductChanges() {
     const updates = [];
     
@@ -763,8 +604,9 @@ async function saveProductChanges() {
         const image = document.getElementById(`${productId}-image`).value.trim();
         const badge = document.getElementById(`${productId}-badge`).value;
         
-        const productData = {
-            id: productId,
+        // Update product data
+        products[productId] = {
+            ...products[productId],
             name,
             nameTamil,
             price,
@@ -773,19 +615,17 @@ async function saveProductChanges() {
             image,
             badge: badge || undefined
         };
-        
-        updates.push(saveProductToDB(productId, productData));
     }
     
     try {
-        await Promise.all(updates);
-        await loadProducts(); // Reload products to ensure consistency
+        saveProductsToStorage();
         showNotification('All product changes saved successfully!', false, 'success');
     } catch (error) {
         showNotification('Failed to save some changes.', true);
     }
 }
 
+// Add new product to localStorage
 async function addNewProduct() {
     const name = newProductName.value.trim();
     const nameTamil = newProductTamil.value.trim();
@@ -807,6 +647,12 @@ async function addNewProduct() {
     
     const productId = name.toLowerCase().replace(/\s+/g, '-');
     
+    // Check if product already exists
+    if (products[productId]) {
+        showNotification('A product with this name already exists.', true);
+        return;
+    }
+    
     const productData = {
         id: productId,
         name,
@@ -819,7 +665,11 @@ async function addNewProduct() {
     };
     
     try {
-        await addProductToDB(productData);
+        // Add to products object
+        products[productId] = productData;
+        
+        // Save to localStorage
+        saveProductsToStorage();
         
         // Clear form
         newProductName.value = '';
@@ -831,8 +681,8 @@ async function addNewProduct() {
         document.getElementById('new-product-preview').innerHTML = '<span>Image preview will appear here</span>';
         document.getElementById('new-product-preview').classList.remove('has-image');
         
-        // Reload products
-        await loadProducts();
+        // Re-render forms
+        renderOwnerForms();
         
         showNotification('New product added successfully!', false, 'success');
     } catch (error) {
@@ -840,13 +690,15 @@ async function addNewProduct() {
     }
 }
 
+// Delete product from localStorage
 async function deleteProductHandler(productId) {
     if (confirm(`Are you sure you want to delete "${products[productId].name}"? This action cannot be undone.`)) {
         try {
-            await deleteProduct(productId);
-            
-            // Remove from local products
+            // Remove from products object
             delete products[productId];
+            
+            // Save to localStorage
+            saveProductsToStorage();
             
             // Update the display
             renderOwnerForms();
@@ -860,6 +712,7 @@ async function deleteProductHandler(productId) {
     }
 }
 
+// Order rendering functions
 function renderOrderHistory() {
     orderList.innerHTML = '';
     
@@ -910,13 +763,13 @@ function renderOrderHistory() {
                 <button class="btn btn-sms" onclick="sendSMSNotification('${order.customerName}', '${order.customerPhone}', ${order.total})">
                     <i class="fas fa-sms"></i> Send SMS
                 </button>
-                <button class="btn btn-primary" onclick="updateOrderStatusHandler('${order._id || order.id}', 'completed')">
+                <button class="btn btn-primary" onclick="updateOrderStatusHandler('${order.id}', 'completed')">
                     <i class="fas fa-check"></i> Mark Completed
                 </button>
-                <button class="btn btn-secondary" onclick="updateOrderStatusHandler('${order._id || order.id}', 'pending')">
+                <button class="btn btn-secondary" onclick="updateOrderStatusHandler('${order.id}', 'pending')">
                     <i class="fas fa-clock"></i> Mark Pending
                 </button>
-                <button class="btn btn-danger" onclick="updateOrderStatusHandler('${order._id || order.id}', 'cancelled')">
+                <button class="btn btn-danger" onclick="updateOrderStatusHandler('${order.id}', 'cancelled')">
                     <i class="fas fa-times"></i> Cancel Order
                 </button>
             </div>
@@ -1028,15 +881,17 @@ function getStatusClass(status) {
     }
 }
 
+// Update order status in localStorage
 async function updateOrderStatusHandler(orderId, status) {
     try {
-        await updateOrderStatus(orderId, status);
-        
         // Update local orders
-        const orderIndex = orders.findIndex(order => order._id === orderId || order.id === orderId);
+        const orderIndex = orders.findIndex(order => order.id === orderId);
         if (orderIndex !== -1) {
             orders[orderIndex].status = status;
         }
+        
+        // Save to localStorage
+        saveOrdersToStorage();
         
         // Re-render orders
         renderOrderHistory();
@@ -1136,6 +991,12 @@ function showPage(pageId) {
     const activePage = document.getElementById(pageId);
     activePage.classList.add('active');
     
+    // Load data when accessing dashboard
+    if (pageId === 'dashboard') {
+        loadProducts();
+        loadOrders();
+    }
+    
     // Special handling for SMS page
     if (pageId === 'sms') {
         renderOrderNotifications();
@@ -1148,11 +1009,6 @@ async function loginToOwnerPortal() {
     
     if (password === OWNER_PASSWORD) {
         showPage('dashboard');
-        
-        // Load data
-        await loadProducts();
-        await loadOrders();
-        
         showNotification('Welcome to SRS Cashews Owner Portal!', false, 'success');
     } else {
         showNotification('Incorrect password. Please try again.', true);
@@ -1163,12 +1019,6 @@ async function loginToOwnerPortal() {
 function logoutFromOwnerPortal() {
     showPage('login');
     ownerPassword.value = '';
-    
-    // Clear sensitive data
-    products = {};
-    orders = [];
-    filteredOrders = [];
-    
     showNotification('Logged out successfully.', false, 'success');
 }
 

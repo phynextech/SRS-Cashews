@@ -1,56 +1,11 @@
-// customer.js
-// API Functions
-async function apiCall(endpoint, options = {}) {
-  try {
-    const response = await fetch(`${API_BASE_URL}${endpoint}`, {
-      headers: {
-        'Content-Type': 'application/json',
-        ...options.headers
-      },
-      ...options
-    });
-    
-    if (!response.ok) {
-      throw new Error(`API error: ${response.status}`);
-    }
-    
-    return await response.json();
-  } catch (error) {
-    console.error('API call failed:', error);
-    throw error;
-  }
-}
+// customer.js - Complete file with localStorage integration
 
-// Load products from MongoDB
-async function loadProducts() {
-  try {
-    const productsArray = await apiCall('/products');
-    
-    // Convert array to object with id as key
-    products = {};
-    productsArray.forEach(product => {
-      products[product.id] = product;
-    });
-    
-    renderProducts();
-  } catch (error) {
-    console.error('Failed to load products from API, using fallback:', error);
-    loadLocalProducts();
-  }
-}
-
-// Save order to MongoDB
-async function saveOrderToDB(orderData) {
-  try {
-    return await apiCall('/orders', {
-      method: 'POST',
-      body: JSON.stringify(orderData)
-    });
-  } catch (error) {
-    console.error('Error saving order:', error);
-    throw error;
-  }
-}
+// Storage Keys
+const STORAGE_KEYS = {
+    PRODUCTS: 'srs_cashews_products',
+    ORDERS: 'srs_cashews_orders', 
+    CART: 'srs_cashews_cart'
+};
 
 // Global data
 let products = {};
@@ -74,6 +29,7 @@ const cartCount = document.querySelector('.cart-count');
 const productSearch = document.getElementById('product-search');
 const filterButtons = document.querySelectorAll('.filter-btn');
 const categoryCards = document.querySelectorAll('.category-card');
+const contactNav = document.getElementById('contact-nav');
 
 // Carousel elements
 const carouselInner = document.querySelector('.carousel-inner');
@@ -98,16 +54,121 @@ const upiDetails = document.getElementById('upi-details');
 const popupOrderItems = document.getElementById('popup-order-items');
 const popupTotal = document.getElementById('popup-total');
 
+// Scroll variables
+let lastScrollTop = 0;
+const header = document.querySelector('header');
+const scrollThreshold = 100;
+
 // Initialize the website
 async function init() {
     await loadProducts();
+    loadCartFromStorage();
+    setupOrderButtonAnimation();
     setupEventListeners();
     updateCartCount();
     startCarousel();
     showNotification('Welcome to SRS Cashews! Premium cashews from Panruti, Tamil Nadu', false);
+    
+    // Set up storage listener for real-time updates
+    window.addEventListener('storage', handleStorageUpdate);
 }
 
-// Fallback to local products with expanded selection and Tamil names
+// Handle storage updates from other tabs/windows
+function handleStorageUpdate(event) {
+    if (event.key === STORAGE_KEYS.PRODUCTS) {
+        loadProducts();
+        showNotification('Products updated!', false);
+    }
+}
+
+// Load products from localStorage or fallback
+async function loadProducts() {
+    try {
+        const storedProducts = localStorage.getItem(STORAGE_KEYS.PRODUCTS);
+        
+        if (storedProducts) {
+            const productsArray = JSON.parse(storedProducts);
+            
+            // Convert array to object with id as key
+            products = {};
+            productsArray.forEach(product => {
+                products[product.id] = product;
+            });
+            
+            renderProducts();
+        } else {
+            // If no products in localStorage, load default products
+            loadLocalProducts();
+            saveProductsToStorage();
+        }
+    } catch (error) {
+        console.error('Failed to load products from storage:', error);
+        loadLocalProducts();
+        saveProductsToStorage();
+    }
+}
+
+// Save products to localStorage
+function saveProductsToStorage() {
+    try {
+        const productsArray = Object.values(products);
+        localStorage.setItem(STORAGE_KEYS.PRODUCTS, JSON.stringify(productsArray));
+    } catch (error) {
+        console.error('Failed to save products to storage:', error);
+    }
+}
+
+// Load cart from localStorage
+function loadCartFromStorage() {
+    try {
+        const storedCart = localStorage.getItem(STORAGE_KEYS.CART);
+        if (storedCart) {
+            cart = JSON.parse(storedCart);
+            updateCart();
+        }
+    } catch (error) {
+        console.error('Failed to load cart from storage:', error);
+        cart = {};
+    }
+}
+
+// Save cart to localStorage
+function saveCartToStorage() {
+    try {
+        localStorage.setItem(STORAGE_KEYS.CART, JSON.stringify(cart));
+    } catch (error) {
+        console.error('Failed to save cart to storage:', error);
+    }
+}
+
+// Save order to localStorage
+async function saveOrderToDB(orderData) {
+    try {
+        // Get existing orders
+        const existingOrders = JSON.parse(localStorage.getItem(STORAGE_KEYS.ORDERS) || '[]');
+        
+        // Add new order with unique ID
+        orderData.id = 'order_' + Date.now();
+        orderData.date = new Date().toISOString();
+        existingOrders.push(orderData);
+        
+        // Save back to localStorage
+        localStorage.setItem(STORAGE_KEYS.ORDERS, JSON.stringify(existingOrders));
+        
+        // Trigger storage event for owner page
+        window.dispatchEvent(new StorageEvent('storage', {
+            key: STORAGE_KEYS.ORDERS,
+            newValue: localStorage.getItem(STORAGE_KEYS.ORDERS)
+        }));
+        
+        return orderData;
+    } catch (error) {
+        console.error('Error saving order:', error);
+        throw error;
+    }
+}
+
+// Fallback to local products
 function loadLocalProducts() {
     products = {
         // Premium Panruti Cashews
@@ -354,9 +415,10 @@ function loadLocalProducts() {
         }
     };
     renderProducts();
+    saveProductsToStorage();
 }
 
-// CAROUSEL FUNCTIONS
+// CAROUSEL FUNCTIONS (keep existing)
 function startCarousel() {
     slideInterval = setInterval(() => {
         nextSlide();
@@ -390,7 +452,7 @@ function updateCarousel() {
     });
 }
 
-// PRODUCT FUNCTIONS - UPDATED WITH INTEGRATED ADD TO CART AND BILINGUAL NAMES
+// PRODUCT FUNCTIONS - UPDATED WITH BILINGUAL NAMES
 function renderProducts(filter = 'all', searchTerm = '') {
     productsGrid.innerHTML = '';
     
@@ -426,22 +488,23 @@ function renderProducts(filter = 'all', searchTerm = '') {
             </div>
             <div class="product-info">
                 <div class="product-name-bilingual">
-                    <div class="product-name-english">${product.name}</div>
-                    <div class="product-name-tamil">${product.nameTamil}</div>
+                    <h4>${product.name} / ${product.nameTamil}</h4>
                 </div>
                 <p class="product-description">${product.description}</p>
                 <div class="product-price">₹${product.price} / 50g</div>
                 
                 <div class="quantity-label">Quantity (50g increments)</div>
                 
-                <div class="quantity-selector">
-                    <button class="quantity-btn minus" data-product="${productId}" ${cartQuantity === 0 ? 'disabled' : ''}>
-                        <i class="fas fa-minus"></i>
-                    </button>
-                    <input type="text" class="quantity-input" data-product="${productId}" value="${cartQuantity}" readonly>
-                    <button class="quantity-btn plus" data-product="${productId}">
-                        <i class="fas fa-plus"></i>
-                    </button>
+                <div class="quantity-container">
+                    <div class="quantity-selector">
+                        <button class="quantity-btn minus" data-product="${productId}" ${cartQuantity === 0 ? 'disabled' : ''}>
+                            <i class="fas fa-minus"></i>
+                        </button>
+                        <input type="text" class="quantity-input" data-product="${productId}" value="${cartQuantity}" readonly>
+                        <button class="quantity-btn plus" data-product="${productId}">
+                            <i class="fas fa-plus"></i>
+                        </button>
+                    </div>
                     <button class="add-to-cart-btn" data-product="${productId}" ${cartQuantity === 0 ? 'disabled' : ''}>
                         <i class="fas fa-shopping-cart"></i>
                         ${cartQuantity > 0 ? 'Update Cart' : 'Add to Cart'}
@@ -495,7 +558,7 @@ function setupProductEventListeners() {
     });
 }
 
-// UPDATED QUANTITY AND CART FUNCTIONS
+// UPDATED QUANTITY AND CART FUNCTIONS WITH STORAGE
 function updateQuantity(productId, isPlus) {
     const quantityInput = document.querySelector(`.quantity-input[data-product="${productId}"]`);
     const minusBtn = document.querySelector(`.quantity-btn.minus[data-product="${productId}"]`);
@@ -565,6 +628,7 @@ function addToCart(productId) {
     addToCartBtn.classList.add('added');
     
     updateCart();
+    saveCartToStorage();
     showNotification(`${quantity} × 50g of ${product.name} ${cart[productId] ? 'updated in' : 'added to'} cart!`);
     
     updateCartCount();
@@ -609,6 +673,7 @@ function updateCartQuantity(productId, isPlus) {
     }
     
     updateCart();
+    saveCartToStorage();
 }
 
 function removeFromCart(productId) {
@@ -630,10 +695,10 @@ function removeFromCart(productId) {
     
     delete cart[productId];
     updateCart();
+    saveCartToStorage();
     showNotification('Item removed from cart.', true);
 }
 
-// Update the updateCart function to ensure consistency
 function updateCart() {
     cartItems.innerHTML = '';
     
@@ -706,7 +771,6 @@ function updateCartTotal() {
     totalElement.textContent = total.toFixed(2);
 }
 
-// Update cart count function
 function updateCartCount() {
     let totalItems = 0;
     
@@ -717,7 +781,22 @@ function updateCartCount() {
     cartCount.textContent = totalItems;
 }
 
-// ORDER POPUP FUNCTIONS
+// SCROLL FUNCTIONALITY
+function handleScroll() {
+    const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+    
+    if (scrollTop > lastScrollTop && scrollTop > scrollThreshold) {
+        // Scroll down - hide header
+        header.style.transform = 'translateY(-100%)';
+    } else {
+        // Scroll up - show header
+        header.style.transform = 'translateY(0)';
+    }
+    
+    lastScrollTop = scrollTop;
+}
+
+// ORDER POPUP FUNCTIONS (keep existing, but they now use localStorage)
 function placeOrder() {
     if (Object.keys(cart).length === 0) {
         showNotification('Your cart is empty. Add some premium Panruti products first!', true);
@@ -729,7 +808,7 @@ function placeOrder() {
     
     // Show the popup
     orderPopup.classList.add('active');
-    document.body.style.overflow = 'hidden'; // Prevent background scrolling
+    document.body.style.overflow = 'hidden';
 }
 
 function updatePopupOrderSummary() {
@@ -797,6 +876,7 @@ async function confirmOrder(formData) {
         // Clear cart
         cart = {};
         updateCart();
+        saveCartToStorage();
         
         // Show appropriate success message
         if (orderData.paymentMethod === 'cod') {
@@ -815,28 +895,12 @@ async function confirmOrder(formData) {
 
 function closeOrderPopup() {
     orderPopup.classList.remove('active');
-    document.body.style.overflow = ''; // Restore scrolling
+    document.body.style.overflow = '';
     orderForm.reset();
     upiDetails.style.display = 'none';
 }
 
-function copyUPI() {
-    const upiId = 'vdcjhsvdcd@upi';
-    navigator.clipboard.writeText(upiId).then(() => {
-        showNotification('UPI ID copied to clipboard!');
-    }).catch(() => {
-        // Fallback for older browsers
-        const textArea = document.createElement('textarea');
-        textArea.value = upiId;
-        document.body.appendChild(textArea);
-        textArea.select();
-        document.execCommand('copy');
-        document.body.removeChild(textArea);
-        showNotification('UPI ID copied to clipboard!');
-    });
-}
-
-// PRINT FUNCTION
+// PRINT FUNCTION (keep existing)
 function printOrderSummary() {
     if (Object.keys(cart).length === 0) {
         showNotification('Your cart is empty. Add some premium Panruti products first!', true);
@@ -1034,6 +1098,12 @@ function showPage(pageId) {
     window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
+// Scroll to footer function
+function scrollToFooter() {
+    const footer = document.getElementById('contact-footer');
+    footer.scrollIntoView({ behavior: 'smooth' });
+}
+
 // EVENT LISTENERS SETUP
 function setupEventListeners() {
     // Navigation
@@ -1047,10 +1117,10 @@ function setupEventListeners() {
         });
     });
     
-    // Contact button
-    document.getElementById('contact-btn').addEventListener('click', (e) => {
+    // Contact navigation
+    contactNav.addEventListener('click', (e) => {
         e.preventDefault();
-        alert('SRS Cashews - Premium Cashews from Panruti\n\n📧 Email: srscashews@gmail.com\n📞 Phone: +91 98765 43210\n📍 Location: Panruti, Cuddalore District, Tamil Nadu - 607106\n\nWe deliver across India! 🚚');
+        scrollToFooter();
     });
     
     // Category cards
@@ -1131,6 +1201,9 @@ function setupEventListeners() {
         confirmOrder(formData);
     });
     
+    // Scroll behavior for header
+    window.addEventListener('scroll', handleScroll);
+    
     // Keyboard shortcuts
     document.addEventListener('keydown', (e) => {
         // ESC key to close notification and popup
@@ -1167,112 +1240,42 @@ function setupEventListeners() {
 document.addEventListener('DOMContentLoaded', init);
 
 // Export functions for global access
-window.updateImagePreview = function(productId) {
-    const imageUrl = document.getElementById(`${productId}-image`).value;
-    const preview = document.getElementById(`${productId}-preview`);
-    
-    if (imageUrl) {
-        preview.innerHTML = `<img src="${imageUrl}" alt="Preview" onerror="this.parentElement.innerHTML='<span>Invalid image URL</span>'">`;
-        preview.classList.add('has-image');
-    } else {
-        preview.innerHTML = '<span>Image preview will appear here</span>';
-        preview.classList.remove('has-image');
-    }
+window.copyUPI = function() {
+    const upiId = 'vdcjhsvdcd@upi';
+    navigator.clipboard.writeText(upiId).then(() => {
+        showNotification('UPI ID copied to clipboard!');
+    }).catch(() => {
+        // Fallback for older browsers
+        const textArea = document.createElement('textarea');
+        textArea.value = upiId;
+        document.body.appendChild(textArea);
+        textArea.select();
+        document.execCommand('copy');
+        document.body.removeChild(textArea);
+        showNotification('UPI ID copied to clipboard!');
+    });
 };
 
-window.updateNewProductPreview = function() {
-    const imageUrl = document.getElementById('new-product-image').value;
-    const preview = document.getElementById('new-product-preview');
+
+// Add this function to handle the order confirmation button animation
+function setupOrderButtonAnimation() {
+    const orderButton = document.getElementById('place-order');
     
-    if (imageUrl) {
-        preview.innerHTML = `<img src="${imageUrl}" alt="Preview" onerror="this.parentElement.innerHTML='<span>Invalid image URL</span>'">`;
-        preview.classList.add('has-image');
-    } else {
-        preview.innerHTML = '<span>Image preview will appear here</span>';
-        preview.classList.remove('has-image');
-    }
-};
-
-window.copyUPI = copyUPI;
-
-// Enhanced responsive functionality
-function setupResponsiveFeatures() {
-    // Handle viewport on mobile devices
-    if ('viewport' in document.documentElement.style) {
-        const viewport = document.querySelector('meta[name="viewport"]');
-        if (viewport) {
-            // Prevent zoom on input focus for better mobile experience
-            document.addEventListener('focusin', function(e) {
-                if (e.target.matches('input, select, textarea')) {
-                    viewport.setAttribute('content', 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no');
-                }
-            });
-            
-            document.addEventListener('focusout', function(e) {
-                if (e.target.matches('input, select, textarea')) {
-                    viewport.setAttribute('content', 'width=device-width, initial-scale=1.0');
-                }
-            });
+    orderButton.addEventListener('click', function(e) {
+        if (Object.keys(cart).length === 0) {
+            showNotification('Your cart is empty. Add some premium Panruti products first!', true);
+            return;
         }
-    }
-    
-    // Handle touch events for better mobile interaction
-    if ('ontouchstart' in window) {
-        document.body.classList.add('touch-device');
         
-        // Improve touch targets
-        const touchElements = document.querySelectorAll('.btn, .filter-btn, .quantity-btn, .cart-quantity-btn, .nav-link');
-        touchElements.forEach(element => {
-            element.style.minHeight = '44px';
-            element.style.minWidth = '44px';
-        });
-    }
-    
-    // Handle orientation changes
-    window.addEventListener('orientationchange', function() {
-        // Refresh carousel and layouts on orientation change
-        setTimeout(() => {
-            if (typeof updateCarousel === 'function') {
-                updateCarousel();
-            }
-            window.dispatchEvent(new Event('resize'));
-        }, 300);
-    });
-    
-    // Optimize for slow connections
-    if ('connection' in navigator) {
-        const connection = navigator.connection;
-        if (connection.saveData || connection.effectiveType.includes('2g')) {
-            // Implement data saving measures
-            document.body.classList.add('save-data');
+        if (!orderButton.classList.contains('animate')) {
+            // Start animation
+            orderButton.classList.add('animate');
+            
+            // After animation completes, show the order popup
+            setTimeout(() => {
+                placeOrder();
+                orderButton.classList.remove('animate');
+            }, 3000); // Show popup after 3 seconds (during animation)
         }
-    }
+    });
 }
-
-// Initialize responsive features
-document.addEventListener('DOMContentLoaded', function() {
-    setupResponsiveFeatures();
-});
-
-// Handle window resize efficiently
-let resizeTimeout;
-window.addEventListener('resize', function() {
-    clearTimeout(resizeTimeout);
-    resizeTimeout = setTimeout(function() {
-        // Update any layout-dependent elements
-        if (typeof updateCarousel === 'function') {
-            updateCarousel();
-        }
-    }, 250);
-});
-
-// Enhanced touch handling for product cards
-document.addEventListener('DOMContentLoaded', function() {
-    document.addEventListener('touchstart', function() {}, { passive: true });
-    
-    // Prevent double-tap zoom on product cards
-    const productCards = document.querySelectorAll('.product-card, .category-card');
-    productCards.forEach(card => {
-        card.style.touchAction = 'manipulation';
-    });
-});

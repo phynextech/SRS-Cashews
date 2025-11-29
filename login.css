@@ -1,0 +1,567 @@
+/* Login page styled to match customer.css theme */
+
+/* Import same font family style */
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap");
+
+:root {
+  --primary-blue: #1e3a8a;
+  --primary-dark: #1e40af;
+  --primary-light: #3b82f6;
+  --accent-gold: #f59e0b;
+  --accent-light: #fbbf24;
+  --dark-bg: #0f172a;
+  --dark-card: #1e293b;
+  --darker-bg: #020617;
+  --text-dark: #1e293b;
+  --text-light: #64748b;
+  --text-white: #f8fafc;
+  --bg-white: #ffffff;
+  --bg-light: #f1f5f9;
+  --border-light: #334155;
+  --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3),
+    0 2px 4px -1px rgba(0, 0, 0, 0.2);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.3),
+    0 4px 6px -2px rgba(0, 0, 0, 0.2);
+  --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.3),
+    0 10px 10px -5px rgba(0, 0, 0, 0.2);
+  --radius: 12px;
+  --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+*, *::after, *::before {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html, body {
+  height: 100%;
+}
+
+body {
+  font-family: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
+  line-height: 1.6;
+  color: var(--text-white);
+  background: linear-gradient(
+    135deg,
+    var(--darker-bg) 0%,
+    var(--dark-bg) 50%,
+    var(--primary-blue) 100%
+  );
+  background-attachment: fixed;
+  -webkit-font-smoothing: antialiased;
+  scroll-behavior: smooth;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  perspective: 1500px;
+  padding: 1rem;
+}
+
+/* Container (card) */
+#container {
+  width: 100%;
+  max-width: 900px;
+  height: 520px;
+  position: relative;
+  border-radius: 20px;
+  background: linear-gradient(
+    135deg,
+    rgba(15, 23, 42, 0.9),
+    rgba(30, 64, 175, 0.95)
+  );
+  box-shadow: var(--shadow-xl);
+  transform-style: preserve-3d;
+  border: 1px solid rgba(59, 130, 246, 0.4);
+
+}
+
+/* Shared inner layout */
+#container > div {
+  position: absolute;
+  width: 50%;
+  min-width: 340px;
+  height: 100%;
+  top: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.content {
+  width: 100%;
+  padding: 2.5rem 3rem;
+  text-align: center;
+}
+
+h1 {
+  font-weight: 800;
+  font-size: 2.4rem;
+  margin-bottom: 0.75rem;
+  background: linear-gradient(135deg, var(--text-white), var(--accent-gold));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.content p {
+  font-size: 0.95rem;
+  color: #cbd5e1;
+  margin-bottom: 1.5rem;
+}
+
+/* Form elements */
+form input {
+  background: rgba(15, 23, 42, 0.9);
+  border: 1px solid var(--border-light);
+  padding: 0.8rem 1rem;
+  margin: 0.4rem 0;
+  width: 100%;
+  font-size: 0.95rem;
+  border-radius: 999px;
+  color: var(--text-white);
+  transition: var(--transition);
+}
+
+form input::placeholder {
+  color: #94a3b8;
+}
+
+form input:focus {
+  outline: none;
+  border-color: var(--accent-gold);
+  box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.2);
+}
+
+/* Text spans */
+span {
+  color: #cbd5e1;
+  font-size: 0.85rem;
+  display: inline-block;
+  margin: 0.5rem auto;
+  font-weight: 400;
+}
+
+span.remember {
+  float: left;
+}
+
+span.remember::before {
+  content: "";
+  display: inline-block;
+  width: 1rem;
+  height: 1rem;
+  border: 2px solid #64748b;
+  vertical-align: middle;
+  margin-right: 0.4rem;
+  border-radius: 4px;
+}
+
+span.forget {
+  float: right;
+  cursor: pointer;
+  color: #e5e7eb;
+  transition: var(--transition);
+}
+
+span.forget:hover {
+  color: var(--accent-gold);
+}
+
+span.clearfix {
+  clear: both;
+  display: table;
+}
+
+span.loginwith {
+  display: flex;
+  width: 100%;
+  margin-top: 1.5rem;
+  white-space: nowrap;
+  overflow: hidden;
+  justify-content: center;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+span.loginwith::before,
+span.loginwith::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: rgba(148, 163, 184, 0.6);
+}
+
+/* Small footer copy */
+span.copy {
+  display: block;
+  position: absolute;
+  bottom: 0.75rem;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 0.75rem;
+  color: #64748b;
+}
+
+/* Buttons */
+button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  margin: 1.2rem auto 0.5rem;
+  border-radius: 999px;
+  border: none;
+  background: linear-gradient(135deg, var(--accent-gold), var(--primary-blue));
+  color: var(--text-white);
+  font-size: 0.9rem;
+  font-weight: 600;
+  padding: 0.85rem 2.2rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  transition: var(--transition);
+  box-shadow: var(--shadow);
+  cursor: pointer;
+}
+
+button svg {
+  vertical-align: middle;
+}
+
+button:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-lg);
+  background: linear-gradient(135deg, var(--primary-blue), var(--accent-gold));
+}
+
+button:active {
+  transform: scale(0.97);
+  box-shadow: var(--shadow);
+}
+
+button:focus {
+  outline: none;
+}
+
+/* Login and register panels */
+.login {
+  left: 0;
+  background: linear-gradient(
+    135deg,
+    rgba(15, 23, 42, 0.98),
+    rgba(15, 23, 42, 0.9)
+  );
+  border-radius: 20px 0 0 20px;
+}
+
+.login button {
+  width: 100%;
+}
+
+.login svg {
+  margin: 0.5rem;
+  stroke: #94a3b8;
+  transition: var(--transition);
+}
+
+.login svg:hover {
+  stroke: var(--accent-gold);
+}
+
+.register {
+  right: 0;
+  z-index: 1;
+  border-radius: 0 20px 20px 0;
+  background: linear-gradient(
+    135deg,
+    rgba(15, 23, 42, 0.98),
+    rgba(30, 64, 175, 0.95)
+  );
+}
+
+.register button {
+  width: 100%;
+}
+
+.register svg {
+  margin: 0.5rem;
+  stroke: #94a3b8;
+  transition: var(--transition);
+}
+
+.register svg:hover {
+  stroke: var(--accent-gold);
+}
+
+/* Flip pages (right side) */
+.page {
+  right: 0;
+  color: var(--text-white);
+  border-radius: 0 20px 20px 0;
+  transform-origin: left center;
+  transition: animation 1s linear;
+}
+
+.page button {
+  border: 1px solid rgba(248, 250, 252, 0.5);
+  background: transparent;
+  box-shadow: none;
+}
+
+.page button:hover {
+  background: rgba(15, 23, 42, 0.5);
+}
+
+.page p {
+  margin: 1.5rem auto 0;
+}
+
+/* Front and back gradients tuned to theme */
+.front {
+  background: linear-gradient(
+    -45deg,
+    var(--primary-light) 0%,
+    var(--primary-blue) 40%,
+    var(--accent-gold) 100%
+  ) no-repeat 0 0 / 200%;
+  z-index: 3;
+}
+
+.back {
+  background: linear-gradient(
+    135deg,
+    var(--accent-gold) 0%,
+    var(--primary-dark) 60%,
+    var(--primary-light) 100%
+  ) no-repeat 0 0 / 200%;
+  z-index: 2;
+}
+
+.back .content {
+  transform: rotateY(180deg);
+}
+
+/* Flip animations (same logic, just kept) */
+.active .front {
+  animation: rot-front 0.6s ease-in-out forwards;
+}
+
+.active .back {
+  animation: rot-back 0.6s ease-in-out forwards;
+}
+
+.close .front {
+  animation: close-rot-front 0.6s ease-in-out forwards;
+}
+
+.close .back {
+  animation: close-rot-back 0.6s ease-in-out forwards;
+}
+
+@keyframes rot-front {
+  from {
+    transform: translateZ(2px) rotateY(0deg);
+  }
+  to {
+    transform: translateZ(1px) rotateY(-180deg);
+  }
+}
+
+@keyframes close-rot-front {
+  from {
+    transform: translateZ(1px) rotateY(-180deg);
+  }
+  to {
+    transform: translateZ(2px) rotateY(0deg);
+  }
+}
+
+@keyframes rot-back {
+  from {
+    transform: translateZ(1px) rotateY(0deg);
+  }
+  to {
+    transform: translateZ(2px) rotateY(-180deg);
+  }
+}
+
+@keyframes close-rot-back {
+  from {
+    transform: translateZ(2px) rotateY(-180deg);
+  }
+  to {
+    transform: translateZ(1px) rotateY(0deg);
+  }
+}
+
+/* Content fade animations */
+.active .register .content {
+  animation: show 0.7s ease-in-out forwards;
+}
+
+.close .register .content {
+  animation: hide 0.7s ease-in-out forwards;
+}
+
+.active .login .content {
+  animation: hide 0.7s ease-in-out forwards;
+}
+
+.close .login .content {
+  animation: show 0.7s ease-in-out forwards;
+}
+
+@keyframes show {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes hide {
+  from {
+    opacity: 1;
+    transform: scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+}
+
+/* Social icons row */
+.login a,
+.register svg + svg {
+  text-decoration: none;
+}
+
+.login a svg,
+.register svg {
+  width: 22px;
+  height: 22px;
+}
+
+/* Responsive */
+@media (max-width: 900px) {
+  #container {
+    height: auto;
+    max-width: 95%;
+  }
+
+  #container > div {
+    min-width: 100%;
+    position: relative;
+  }
+
+  .page {
+    display: none; /* hide side flip cards on small screens if you want */
+  }
+
+  .login,
+  .register {
+    position: relative;
+    width: 100%;
+    border-radius: 20px;
+  }
+}
+
+@media (max-width: 600px) {
+  .content {
+    padding: 1.75rem 1.5rem;
+  }
+
+  h1 {
+    font-size: 2rem;
+  }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* Add these styles to your existing CSS */
+
+/* Remember me container */
+.remember-container {
+  float: left;
+  display: flex;
+  align-items: center;
+  margin: 0.5rem 0;
+}
+
+/* Custom checkbox styling */
+.remember-checkbox {
+  display: none;
+}
+
+.remember-label {
+  color: #cbd5e1;
+  font-size: 0.85rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  font-weight: 400;
+  transition: var(--transition);
+}
+
+.remember-label:hover {
+  color: #e5e7eb;
+}
+
+.remember-label::before {
+  content: "";
+  display: inline-block;
+  width: 1rem;
+  height: 1rem;
+  border: 2px solid #64748b;
+  border-radius: 4px;
+  margin-right: 0.4rem;
+  background: rgba(15, 23, 42, 0.9);
+  transition: var(--transition);
+}
+
+.remember-checkbox:checked + .remember-label::before {
+  background: var(--accent-gold);
+  border-color: var(--accent-gold);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='20 6 9 17 4 12'%3E%3C/polyline%3E%3C/svg%3E");
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: 10px;
+}
+
+/* Keep the existing forget password styling */
+.forget {
+  float: right;
+  cursor: pointer;
+  color: #e5e7eb;
+  font-size: 0.85rem;
+  margin: 0.5rem 0;
+  transition: var(--transition);
+}
+
+.forget:hover {
+  color: var(--accent-gold);
+}
+
+.clearfix {
+  clear: both;
+  display: table;
+}

@@ -3,399 +3,72 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SRS Cashews - Premium Dry Fruits & Nuts from Panruti</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="customer.css">
+    <title>Login - SRS Cashews</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="login.css">
 </head>
 <body>
-    <!-- Header with Logo and Navigation -->
-    <header>
-        <div class="container header-content">
-            <div class="logo">
-                <img src="https://instagram.fmaa2-3.fna.fbcdn.net/v/t51.2885-19/472311452_569018455918509_7172343561996526551_n.jpg?stp=dst-jpg_s320x320_tt6&efg=eyJ2ZW5jb2RlX3RhZyI6InByb2ZpbGVfcGljLmRqYW5nby4xMDgwLmMyIn0&_nc_ht=instagram.fmaa2-3.fna.fbcdn.net&_nc_cat=109&_nc_oc=Q6cZ2QFp5whxkw3LWTwEtzOEwdh3XGixt9nt05kMmvuiy0yLeo0ZwZXMMUw9sSGhbeHf3fsCItwZGxr3-ug_JN8Jqif0&_nc_ohc=wt-L9GLn09UQ7kNvwFw7jRz&_nc_gid=RcBSTRBLfi1r7HtUyTBt_w&edm=AOQ1c0wBAAAA&ccb=7-5&oh=00_AfjlficeaCLKKLdSMQ8-kQY1_qQK430fm00NAp9O6d6cmA&oe=6928DC58&_nc_sid=8b3546" alt="SRS Cashews Logo" class="logo-image">
-                <div class="logo-text">
-                    <div class="logo-main">SRS<span class="logo-highlight">Cashews</span></div>
-                    <div class="logo-subtitle">From Panruti, Tamil Nadu</div>
-                </div>
-            </div>
-            <nav>
-                <ul>
-                    <li><a href="#" class="nav-link" data-page="home">Home</a></li>
-                    <li><a href="#" class="nav-link" data-page="products">Premium Collection</a></li>
-                    <li><a href="#" class="nav-link" data-page="cart">Cart <span class="cart-count">0</span></a></li>
-                    <li><a href="#" class="nav-link" id="contact-btn">Contact</a></li>
-                </ul>
-            </nav>
-        </div>
-    </header>
-
-    <!-- Main Content -->
-    <main class="container">
-        <!-- Home Page -->
-        <section id="home" class="page active">
-            <!-- Image Carousel -->
-            <div class="carousel">
-                <div class="carousel-inner">
-                    <div class="carousel-item active">
-                        <img src="https://images.unsplash.com/photo-1546548970-71785318a17b?ixlib=rb-4.0.3&auto=format&fit=crop&w=2069&q=80" alt="Premium Dry Fruits" class="carousel-image">
-                        <div class="carousel-caption">
-                            <h2>Premium Quality Cashews from Panruti</h2>
-                            <p>Direct from the cashew capital of Tamil Nadu - Panruti, Cuddalore. Experience the finest quality cashews and dry fruits.</p>
-                        </div>
-                    </div>
-                    <div class="carousel-item">
-                        <img src="https://images.unsplash.com/photo-1574323347407-f5e1ad6d020b?ixlib=rb-4.0.3&auto=format&fit=crop&w=2069&q=80" alt="Healthy Nuts" class="carousel-image">
-                        <div class="carousel-caption">
-                            <h2>100% Pure & Natural</h2>
-                            <p>No additives, no preservatives. Just pure, natural nuts and dry fruits packed with essential nutrients.</p>
-                        </div>
-                    </div>
-                    <div class="carousel-item">
-                        <img src="https://nyspiceshop.com/cdn/shop/articles/TYPES_OF_NUTS_AND_SEEDS_AND_THEIR_HEALTH_BENEFITS.jpeg?v=1730226897" alt="Fresh Nuts" class="carousel-image">
-                        <div class="carousel-caption">
-                            <h2>Fresh from Panruti Farms</h2>
-                            <p>We source directly from Panruti farms to ensure maximum freshness and authentic taste.</p>
-                        </div>
-                    </div>
-                </div>
-                <button class="carousel-control prev">
-                    <i class="fas fa-chevron-left"></i>
-                </button>
-                <button class="carousel-control next">
-                    <i class="fas fa-chevron-right"></i>
-                </button>
-                <div class="carousel-indicators">
-                    <button class="carousel-indicator active"></button>
-                    <button class="carousel-indicator"></button>
-                    <button class="carousel-indicator"></button>
-                </div>
-            </div>
-            
-            <div class="hero">
-                <div class="hero-badge">
-                    <i class="fas fa-map-marker-alt"></i>
-                    From Panruti, Tamil Nadu
-                </div>
-                <h1 class="hero-title">Premium Quality Cashews & Dry Fruits</h1>
-                <p class="hero-subtitle">SRS Cashews brings you the finest quality products directly from Panruti - the cashew capital of Tamil Nadu. Authentic taste, guaranteed quality.</p>
-                <a href="#" class="btn btn-primary nav-link" data-page="products">
-                    <span>Explore Panruti Specials</span>
-                    <i class="fas fa-arrow-right"></i>
-                </a>
-            </div>
-            
-            <!-- Quick Categories -->
-            <div class="quick-categories">
-                <div class="category-card" data-filter="cashews">
-                    <div class="category-icon">
-                        <i class="fas fa-star"></i>
-                    </div>
-                    <h3>Panruti Cashews</h3>
-                    <p>Premium quality cashews from Panruti farms</p>
-                </div>
-                <div class="category-card" data-filter="dryfruits">
-                    <div class="category-icon">
-                        <i class="fas fa-apple-alt"></i>
-                    </div>
-                    <h3>Dry Fruits</h3>
-                    <p>Dates, Raisins, Apricots & More</p>
-                </div>
-                <div class="category-card" data-filter="nuts">
-                    <div class="category-icon">
-                        <i class="fas fa-seedling"></i>
-                    </div>
-                    <h3>Other Nuts</h3>
-                    <p>Almonds, Walnuts, Pistachios & More</p>
-                </div>
-            </div>
-            
-            <!-- Panruti Special Section -->
-            <div class="panruti-special">
-                <div class="special-content">
-                    <div class="special-text">
-                        <h2>Why Panruti Cashews?</h2>
-                        <p>Panruti in Cuddalore district is renowned for producing the finest quality cashews in India. The unique soil and climate conditions give Panruti cashews their distinctive taste, size, and texture that you won't find anywhere else.</p>
-                        <div class="special-features">
-                            <div class="feature-item">
-                                <i class="fas fa-check-circle"></i>
-                                <span>Direct from Panruti farms</span>
-                            </div>
-                            <div class="feature-item">
-                                <i class="fas fa-check-circle"></i>
-                                <span>Authentic Tamil Nadu quality</span>
-                            </div>
-                            <div class="feature-item">
-                                <i class="fas fa-check-circle"></i>
-                                <span>Fresh and naturally processed</span>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="special-image">
-                        <img src="https://cdnasd.countrydelight.in/cdproductimg/new-website/Wholecashews450gm-PDP4.jpg_1723555418823.jpg" alt="Panruti Cashews">
-                    </div>
-                </div>
-            </div>
-            
-            <!-- Features Section -->
-            <div class="features">
-                <div class="feature">
-                    <div class="feature-icon">
-                        <i class="fas fa-award"></i>
-                    </div>
-                    <h3>Premium Quality</h3>
-                    <p>Every product is carefully selected from Panruti farms for superior taste and quality.</p>
-                </div>
-                <div class="feature">
-                    <div class="feature-icon">
-                        <i class="fas fa-truck"></i>
-                    </div>
-                    <h3>Direct from Farm</h3>
-                    <p>Straight from Panruti farms to your home, ensuring freshness and authenticity.</p>
-                </div>
-                <div class="feature">
-                    <div class="feature-icon">
-                        <i class="fas fa-heart"></i>
-                    </div>
-                    <h3>Health Focused</h3>
-                    <p>100% natural products with no additives or preservatives for your well-being.</p>
-                </div>
-            </div>
-        </section>
-
-        <!-- Products Page -->
-        <section id="products" class="page">
-            <div class="products-header">
-                <h2>Our Premium Collection</h2>
-                <p>Authentic products from Panruti, Tamil Nadu - The land of finest cashews</p>
-            </div>
-            
-            <div class="search-filter">
-                <div class="search-box">
-                    <i class="fas fa-search"></i>
-                    <input type="text" class="search-input" id="product-search" placeholder="Search for products...">
-                </div>
-                <div class="filter-options">
-                    <button class="filter-btn active" data-filter="all">All Products</button>
-                    <button class="filter-btn" data-filter="cashews">Panruti Cashews</button>
-                    <button class="filter-btn" data-filter="dryfruits">Dry Fruits</button>
-                    <button class="filter-btn" data-filter="nuts">Other Nuts</button>
-                    <button class="filter-btn" data-filter="seeds">Seeds</button>
-                </div>
-            </div>
-            
-            <div class="products-grid">
-                <!-- Products will be dynamically added here -->
-            </div>
-        </section>
-
-        <!-- Cart Page -->
-        <section id="cart" class="page">
-            <div class="cart-container">
-                <div class="cart-header">
-                    <h2>Your Shopping Cart</h2>
-                    <p>Review your premium selection from Panruti</p>
-                </div>
-                
-                <div class="cart-items">
-                    <!-- Cart items will be dynamically added here -->
-                    <div id="empty-cart-message" class="empty-cart">
-                        <div class="empty-cart-icon">
-                            <i class="fas fa-shopping-cart"></i>
-                        </div>
-                        <p>Your cart is empty. Add some premium Panruti products!</p>
-                        <a href="#" class="btn btn-primary nav-link" data-page="products">Browse Products</a>
-                    </div>
-                </div>
-                
-                <div class="cart-summary">
-                    <div class="summary-row">
-                        <span>Subtotal:</span>
-                        <span id="subtotal">₹0.00</span>
-                    </div>
-                    <div class="summary-row">
-                        <span>Shipping:</span>
-                        <span>₹50.00</span>
-                    </div>
-                    <div class="summary-row summary-total">
-                        <span>Total:</span>
-                        <span id="total">₹50.00</span>
-                    </div>
+    <div id="container">
+        <div class="login">
+            <div class="content">
+                <h1>Log In</h1>
+                <!-- Replace the entire form section in the login div with this -->
+                <form id="login-form">
+                    <input type="email" id="login-email" placeholder="email" required>
+                    <input type="password" id="login-password" placeholder="password" required>
                     
-                    <div class="cart-actions">
-                        <button class="btn btn-secondary" id="continue-shopping">Continue Shopping</button>
-                        <button class="btn btn-primary" id="place-order">Place Order</button>
-                        <button class="btn btn-outline" id="print-summary">Print Summary</button>
+                    <div class="remember-container">
+                        <input type="checkbox" id="remember-me" class="remember-checkbox">
+                        <label for="remember-me" class="remember-label">Remember me</label>
                     </div>
-                </div>
+                    <span class="forget">Forgot password?</span>
+                    <span class="clearfix"></span>
+                    
+                    <button type="submit">Log In</button>
+                </form>
+                <span class="loginwith">Or Connect with</span>
+                <a href="#"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-facebook"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></svg></a>
+                <a href="#"><svg class="feather feather-twitter sc-dnqmqq jxshSx" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M23 3a10.9 10.9 0 0 1-3.14 1.53 4.48 4.48 0 0 0-7.86 3v1A10.66 10.66 0 0 1 3 4s-4 9 5 13a11.64 11.64 0 0 1-7 2c9 5 20 0 20-11.5a4.5 4.5 0 0 0-.08-.83A7.72 7.72 0 0 0 23 3z"></path></svg></a>
+                <a href="#"><svg class="feather feather-github sc-dnqmqq jxshSx" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"></path></svg></a>
+                <a href="#"><svg class="feather feather-linkedin sc-dnqmqq jxshSx" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"></path><rect x="2" y="9" width="4" height="12"></rect><circle cx="4" cy="4" r="2"></circle></svg></a>
+                <span class="copy">&copy 2024</span>
             </div>
-        </section>
-    </main>
-
-    <!-- Print Bill (Hidden by default) -->
-    <div id="print-bill" class="print-bill">
-        <div class="bill-header">
-            <h2>SRS CASHEWS</h2>
-            <p>Premium Cashews from Panruti, Tamil Nadu</p>
-            <div class="bill-date" id="bill-date"></div>
         </div>
-        
-        <div class="bill-items" id="bill-items">
-            <!-- Bill items will be dynamically added here -->
+        <div class="page front">
+            <div class="content">
+                <svg xmlns="http://www.w3.org/2000/svg" width="96" height="96" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-user-plus"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg>
+                <h1>Hello, friend!</h1>
+                <p>Enter your personal details and start journey with us</p>
+                <button type="button" id="register">Register <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-arrow-right-circle"><circle cx="12" cy="12" r="10"/><polyline points="12 16 16 12 12 8"/><line x1="8" y1="12" x2="16" y2="12"/></svg></button>
+            </div>
         </div>
-        
-        <div class="bill-divider"></div>
-        
-        <div class="bill-total">
-            <span>TOTAL:</span>
-            <span id="bill-total">₹0.00</span>
+        <div class="page back">
+            <div class="content">
+                <svg xmlns="http://www.w3.org/2000/svg" width="96" height="96" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-log-in"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
+                <h1>Welcome Back!</h1>
+                <p>To keep connected with us please login with your personal info</p>
+                <button type="button" id="login"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-arrow-left-circle"><circle cx="12" cy="12" r="10"/><polyline points="12 8 8 12 12 16"/><line x1="16" y1="12" x2="8" y2="12"/></svg> Log In</button>
+            </div>
         </div>
-        
-        <div class="bill-footer">
-            <p>Thank you for choosing SRS Cashews!</p>
-            <p>From Panruti with Love ❤️</p>
+        <div class="register">
+            <div class="content">
+                <h1>Sign Up</h1>
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-facebook"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></svg>
+                <svg class="feather feather-twitter sc-dnqmqq jxshSx" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M23 3a10.9 10.9 0 0 1-3.14 1.53 4.48 4.48 0 0 0-7.86 3v1A10.66 10.66 0 0 1 3 4s-4 9 5 13a11.64 11.64 0 0 1-7 2c9 5 20 0 20-11.5a4.5 4.5 0 0 0-.08-.83A7.72 7.72 0 0 0 23 3z"></path></svg>
+                <svg class="feather feather-github sc-dnqmqq jxshSx" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"></path></svg>
+                <svg class="feather feather-linkedin sc-dnqmqq jxshSx" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"></path><rect x="2" y="9" width="4" height="12"></rect><circle cx="4" cy="4" r="2"></circle></svg>
+                <span class="loginwith">Or</span>
+                <form id="register-form">
+                    <input type="text" id="register-name" placeholder="name" required>
+                    <input type="email" id="register-email" placeholder="email" required>
+                    <input type="password" id="register-password" placeholder="password" required> 
+                   <!-- <span class="remember">I accept terms</span>  -->
+                    <span class="clearfix"></span>
+                    <button type="submit">Register</button>
+                </form>
+            </div>		
         </div>
     </div>
-
-    <!-- Notification -->
-    <div class="notification" id="notification">
-        Order placed successfully! We'll contact you soon.
-    </div>
-
-    <!-- Footer -->
-    <footer>
-        <div class="container">
-            <div class="footer-content">
-                <div class="footer-section">
-                    <h3>SRS Cashews</h3>
-                    <p>Direct from Panruti, Cuddalore - The cashew capital of Tamil Nadu. We bring you authentic, premium quality cashews and dry fruits.</p>
-                    <div class="location-badge">
-                        <i class="fas fa-map-marker-alt"></i>
-                        Panruti, Cuddalore, Tamil Nadu
-                    </div>
-                    <div class="social-icons">
-                        <a href="#"><i class="fab fa-whatsapp"></i></a>
-                        <a href="#"><i class="fab fa-instagram"></i></a>
-                        <a href="#"><i class="fab fa-facebook"></i></a>
-                    </div>
-                </div>
-                <div class="footer-section">
-                    <h3>Contact Us</h3>
-                    <p><i class="fas fa-envelope"></i> srscashews@gmail.com</p>
-                    <p><i class="fas fa-phone"></i> +91 98765 43210</p>
-                    <p><i class="fas fa-clock"></i> Mon-Sat: 8AM - 8PM</p>
-                    <p><i class="fas fa-map-pin"></i> Panruti, Cuddalore District</p>
-                    <p>Tamil Nadu - 607106</p>
-                </div>
-                <div class="footer-section">
-                    <h3>Why Choose Us?</h3>
-                    <p><i class="fas fa-check"></i> Direct from Panruti farms</p>
-                    <p><i class="fas fa-check"></i> 100% authentic quality</p>
-                    <p><i class="fas fa-check"></i> Fresh and natural</p>
-                    <p><i class="fas fa-check"></i> Competitive prices</p>
-                    <p><i class="fas fa-check"></i> Pan India delivery</p>
-                </div>
-            </div>
-            <div class="copyright">
-                <p>&copy; 2023 SRS Cashews - Premium Cashews from Panruti, Tamil Nadu. All rights reserved.</p>
-            </div>
-        </div>
-    </footer>
-
-    <!-- Order Form Popup -->
-    <div id="order-popup" class="order-popup">
-        <div class="order-popup-content">
-            <div class="popup-header">
-                <h3>Place Your Order</h3>
-                <button class="close-popup">&times;</button>
-            </div>
-            <form id="order-form" class="order-form">
-                <div class="form-group">
-                    <label for="customer-name">Full Name *</label>
-                    <input type="text" id="customer-name" name="customer-name" required>
-                </div>
-                <div class="form-group">
-                    <label for="customer-phone">Phone Number *</label>
-                    <input type="tel" id="customer-phone" name="customer-phone" required>
-                </div>
-                <div class="form-group">
-                    <label for="customer-address">Delivery Address *</label>
-                    <textarea id="customer-address" name="customer-address" rows="3" required></textarea>
-                </div>
-                <div class="form-group">
-                    <label for="customer-pincode">Pincode *</label>
-                    <input type="text" id="customer-pincode" name="customer-pincode" required>
-                </div>
-                <div class="form-group">
-                    <label for="customer-place">City/Town *</label>
-                    <input type="text" id="customer-place" name="customer-place" required>
-                </div>
-                
-                <div class="payment-methods">
-                    <h4>Select Payment Method</h4>
-                    <div class="payment-options">
-                        <label class="payment-option">
-                            <input type="radio" name="payment-method" value="cod" required>
-                            <div class="payment-card">
-                                <i class="fas fa-money-bill-wave"></i>
-                                <span>Cash on Delivery (COD)</span>
-                            </div>
-                        </label>
-                        <label class="payment-option">
-                            <input type="radio" name="payment-method" value="online" required>
-                            <div class="payment-card">
-                                <i class="fas fa-credit-card"></i>
-                                <span>Online Payment</span>
-                            </div>
-                        </label>
-                    </div>
-                </div>
-
-                <!-- UPI Payment Details (Hidden by default) -->
-                <div id="upi-details" class="upi-details" style="display: none;">
-                    <div class="upi-header">
-                        <h5>UPI Payment Details</h5>
-                    </div>
-                    <div class="upi-info">
-                        <div class="qr-code">
-                            <!-- Replace with your actual QR code image -->
-                            <img src="img1.png" alt="UPI QR Code" onerror="this.style.display='none'">
-                        </div>
-                        <div class="upi-id">
-                            <strong>UPI ID:</strong>
-                            <div class="upi-address">vdcjhsvdcd@upi</div>
-                            <button type="button" class="btn-copy" onclick="copyUPI()">
-                                <i class="fas fa-copy"></i> Copy UPI ID
-                            </button>
-                        </div>
-                    </div>
-                    <div class="payment-instruction">
-                        <p><i class="fas fa-info-circle"></i> After payment, please send the screenshot to:</p>
-                        <div class="contact-number">
-                            <i class="fas fa-phone"></i> 9488588456
-                        </div>
-                    </div>
-                </div>
-
-                <div class="order-summary">
-                    <h4>Order Summary</h4>
-                    <div id="popup-order-items">
-                        <!-- Order items will be dynamically added here -->
-                    </div>
-                    <div class="order-total">
-                        <strong>Total: ₹<span id="popup-total">0.00</span></strong>
-                    </div>
-                </div>
-
-                <div class="form-actions">
-                    <button type="button" class="btn btn-secondary" id="cancel-order">Cancel</button>
-                    <button type="submit" class="btn btn-primary" id="confirm-order">
-                        Confirm Order
-                    </button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <script src="customer.js"></script>
-</body>  
+    <script src="login.js"></script>
+</body>
 </html>
